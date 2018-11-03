@@ -4,6 +4,21 @@
 
 import sys
 
+
+class Graph:
+    def __init__():
+        self.adj = {}
+        total = 0
+        for nodes in lis:
+            node = nodes.split(' -> ')
+            values = node[1].split(',')
+            adj[node[0]] = values
+        total += len(values)
+
+    def getNode():
+
+    def 
+
 def findPath(tup):
     adj = tup[0]
     total = tup[1]
