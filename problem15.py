@@ -23,14 +23,15 @@ class DirectedAcyclicGraph:
         current = node[0]
         nextNode = values[0]
         w = values[1]
+        truePath = False # Used when traversing graph and checks if this came from the start node
         if current in self.adj:
             self.adj.get(current).append(nextNode)
         else:
             self.adj[current] = [nextNode]
         if nextNode in self.weight:
-            self.weight.get(nextNode).append((w,current))
+            self.weight.get(nextNode).append((w,current,truePath))
         else:
-            self.weight[nextNode] = [(w,current)]
+            self.weight[nextNode] = [(w,current,truePath)]
 
     def topologicalSort(self):
         '''
@@ -65,31 +66,48 @@ class DirectedAcyclicGraph:
     def longestPath(self,top,start,end):
         '''
         '''
-        highestWeight = {}
-        front = top.index(start)
-        back = top.index(end)
-        for i in range(front,back+1):
-            incoming = self.weight.get(top[i])
+        print(top)
+        highestWeight = self.weight.copy()
+        for node in top[top.index(start)+1:top.index(end)+1]:
+            incoming = highestWeight.get(node)
             if incoming == None:
                 continue
             highest = -1
+            longest = incoming[0]
             for weights in incoming:
                 if weights[1] == start:
-                    longest = weights
+                    weights = list(weights)
+                    weights[2] = True
+                    longest = tuple(weights)
+                    outgoing = highestWeight.get(node)
+                    for out in outgoing:
+                        outWeights = list(out)
+                        outWeights[2] = True
+                        outWeights
                     break
-                elif highest < int(weights[0]):
-                    longest = weights
-                    highest = int(weights[0])
-            highestWeight[top[i]] = longest
+                if highestWeight.get(weights[1]) == None:
+                    continue
+                print(weights)
+                if highest < int(weights[0]):
+                    if highestWeight.get(weights[1])[2] == True:
+                        weights = list(weights)
+                        weights[2] = True
+                        longest = tuple(weights)
+                    else:
+                        highest = int(weights[0])
+                        longest = weights
+            if longest[2] == True:
+                longest = list(longest)
+                longest[0] += highestWeight.get(longest[1])[0]
+                longest = tuple(longest)
+                highestWeight[node] = longest
         current = end
         path = current
-        weight = 0
         while current != start:
             path = highestWeight.get(current)[1] + '->' + path
-            weight += int(highestWeight.get(current)[0])
             current = highestWeight.get(current)[1]
-        return (weight,path)
-
+        return (highestWeight.get(end)[0],path)
+    
 def main():
     '''
     '''
