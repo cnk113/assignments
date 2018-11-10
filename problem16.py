@@ -9,18 +9,12 @@ def hiddenPath(string,states,matrix):
     '''
     calculates the probability of the string based on the transition matrix
     '''
-    if string[0] == states[0]:
-        prev = 0
-    else:
-        prev = 1
-    prob = 
-    for i in range(1,len(string)):
-        if string[i] == states[0]:
-             prob *= matrix[prev,0]
-             prev = 0
-        else:
-             prob *= matrix[prev,1]
-             prev = 1
+    d = {}
+    for i in range(len(states)):
+        d[states[i]] = i
+    prob = matrix[d.get(string[0]),d.get(string[1])]
+    for i in range(2,len(string)):
+        prob *= matrix[d.get(string[i-1],d.get(string[i]))
     return prob
 
 def main():
