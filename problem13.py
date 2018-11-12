@@ -4,96 +4,79 @@
 
 import sys
 
-
-class Graph:
-    def __init__():
+'''
+'''
+class DirectedGraph:
+    '''
+    '''
+    def __init__(self):
+        '''
+        '''
+        self.degree = {}
         self.adj = {}
-        total = 0
-        for nodes in lis:
-            node = nodes.split(' -> ')
-            values = node[1].split(',')
-            adj[node[0]] = values
-        total += len(values)
+        self.length = 0
 
-    def getNode():
+    def insert(self,key,values):
+        '''
+        '''
+        self.adj[key] = values
 
-    def 
+    def outDegrees(self): 
+        '''
+        '''
+        for key in adj:
+            values = self.adj.get(key)
+            if key in self.degree:
+                self.degree[key] += len(values)
+            else:
+                self.degree[key] = len(values)
 
-def findPath(tup):
-    adj = tup[0]
-    total = tup[1]
-    keys = list(adj.keys())
-    for start in keys:
-        current = start
-        visited = traverse(adj,total,current,keys)
-        if len(visited) == total:
-            return visited
+    def traverse(self):
+        '''
+        '''
+        final = []
+        visited = []
+        for key in self.adj:
+            visited.append(key)
+            current = self.adj.get(key)[self.degree.get(key)-1]
+            self.degree[key] -= 1
+            break
+        while current != None:
+            visited.append(current)
+            edge = self.degree.get(current) - 1
+            self.degree[current] -= 1
+            current = self.adj.get(current)[edge]
+            if self.degree.get(current) == 0:
+                current = self.backtrack(visited,final,current)
+        return final
 
-def traverse(adj,total,current,keys):
-    unused = []
-    visited = [current]
-    restart = False
-    while restart == False: # traversal
-        print(visited)
-        current = getNext(adj,current)
-        if current == None:
-            restart = backtrack(adj,current,visited,unused,keys)
-        else:
-            visited.append(current) # adds to visited
-            if getUnunsed(adj,current) == None:
-                pass    
-            elif len(getUnunsed(adj,current)) > 0:
-                unused.append((current,getUnunsed(adj,current))) # stores the current node and nodes that are unused in a tuple
-    return visited
-
-def backtrack(adj,current,visited,unused,keys):
-    if len(unused) == 0: # if there is no more unused edges, a dead end
-        return True
-    new = unused[len(unused)-1] # gets last ununsed edge
-    visited = visited[:visited.index(new[0])+1] # backtracks
-    current = new[1].pop(0) # removes the unused node after being used
-    visited.append(current)
-    if getUnunsed(adj,current) == None:
-        pass    
-    elif len(getUnunsed(adj,current)) > 0:
-        unused.append((current,getUnunsed(adj,current)))
-    if len(new[1]) == 0:
-        unused.pop() # removes the entire node and edges if there are no more unused edges
-    return False
-
-def getNext(adj,node):
-    nodes = adj.get(node)
-    if nodes == None:
-        return None
-    return nodes[0]
-
-def getUnunsed(adj,node):
-    nodes = adj.get(node)
-    if nodes == None:
-        return None
-    return nodes[1:]  
-
-def constructAdjacencyList(lis):
-    adj = {}
-    total = 0
-    for nodes in lis:
-        node = nodes.split(' -> ')
-        values = node[1].split(',')
-        adj[node[0]] = values
-        total += len(values)
-    return (adj,total)
+    def backtrack(self,visited,final,current):
+        '''
+        '''
+        final.append(current)
+        while self.degree.get(current) == 0:
+            if len(visited) == 0:
+                return None
+            current = visited.pop()
+            final.append(current)
+        visited.append(final.pop())
+        return current
 
 def main():
+    '''
+    '''
     lis = sys.stdin.readlines()
-    new = []
-    for s in lis:
-       new.append(s.rstrip())
-    path = findPath(constructAdjacencyList(new))
-    p = path[0]
-    path.remove(p)
-    for node in path:
-        p += '->' + node
-    print(p)
+    graph = DirectedGraph()
+    for value in lis:
+        node = value.rstrip().split(' -> ')
+        values = node[1].split(',')
+        graph.insert(node[0],values)
+    graph.outDegrees()
+    path = graph.traverse()
+    current = path[0]
+    for i in range(1,len(path)):
+        current.append('->' + path[i])
+    print(current)
 
 if __name__ == '__main__':
 	main()
