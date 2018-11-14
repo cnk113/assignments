@@ -7,9 +7,14 @@ import numpy as np
 
 class Viterbi:
     '''
+    Implementation of the Viterbi algorithm
+    Input: emission matrix, state matrix, emissions, and states
+    Output: hidden path
     '''
     def __init__(self,emissions,states,sM,eM):
         '''
+        sets the class variables:
+        emission matrix, state matrix, state dict of the index to label, emission dict of label to index
         '''
         self.tMatrix = sM.astype(np.float)
         self.eMatrix = eM.astype(np.float)
@@ -23,6 +28,8 @@ class Viterbi:
 
     def path(self,string):
         '''
+        finds the hidden path taken by the input string
+        backtracks and returns the hidden path taken
         '''
         dag = np.zeros((len(self.states),len(string)))
         for i in range(len(self.states)):
@@ -52,6 +59,10 @@ class Viterbi:
 
 def main():
     '''
+    parses the stdin file and creates numpy matrices of the emissions and states
+    creates the Viterbi object and runs the functions
+    Input: file (through stdin)
+    Output: the hidden path
     '''
     lines = sys.stdin.readlines()
     newLines = []
