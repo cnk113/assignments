@@ -15,7 +15,7 @@ class Viterbi:
         self.eMatrix = eM.astype(np.float)
         self.states = {}
         self.emissions = {}
-        self.path = {}
+        self.back = {}
         for i in range(len(states)):
             self.states[i] = states[i]
         for i in range(len(emissions)):
@@ -33,13 +33,13 @@ class Viterbi:
                 for k in range(len(self.states)):
                     temp.append(dag[k,i-1] * self.tMatrix[k,j])
                 dag[j,i] = max(temp) * self.eMatrix[j,self.emissions.get(string[i])]
-                self.path[dag[j,i]] = temp.index(max(temp))
+                self.back[dag[j,i]] = temp.index(max(temp))
         p = [dag[:,len(string)-1].argmax(axis=0)]
+        current = dag[:,i].max()
         for i in range(len(string)-1,0,-1):
-            current = dag[:,i].max()
-            row = self.path.get(current)
+            row = self.back.get(current)
             p.append(row)
-        print(p)
+            current = dag[row,i]
         return p[::-1]
 
     def decoder(self,string):
