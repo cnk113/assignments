@@ -58,12 +58,14 @@ def main():
         newLines.append(line.rstrip())
     emissions = newLines[2].split()
     states = newLines[4].split()
-    a = newLines[7].split('\t')
-    b = newLines[8].split('\t')
-    c = newLines[11].split('\t')
-    d = newLines[12].split('\t')
-    statesMatrix = np.array([a[1:],b[1:]])
-    emissionsMatrix = np.array([c[1:],d[1:]])
+    sMatrix = []
+    eMatrix = []
+    for i in range(7,7+len(states)):
+        sMatrix.append(newLines[i].split('\t')[1:])
+    for i in range(9+len(states),9+2*len(states)):
+        eMatrix.append(newLines[i].split('\t')[1:])
+    statesMatrix = np.array(sMatrix)
+    emissionsMatrix = np.array(eMatrix)
     hmm = HiddenMarkovModel(emissions,states,statesMatrix,emissionsMatrix)
     print(hmm.emissionProbability(newLines[0]))
 

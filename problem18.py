@@ -16,7 +16,7 @@ class Viterbi:
     Input: emission matrix, state matrix, emissions, and states
     Output: hidden path
     '''
-    def __init__(self,emissions,states,sM,eM):
+    def __init__(self,states,emissions,sM,eM):
         '''
         sets the class variables:
         emission matrix, state matrix, state dict of the index to label, emission dict of label to index
@@ -25,7 +25,6 @@ class Viterbi:
         self.eMatrix = eM.astype(np.float)
         self.states = {}
         self.emissions = {}
-        self.back = {}
         for i in range(len(states)):
             self.states[i] = states[i]
         for i in range(len(emissions)):
@@ -39,17 +38,18 @@ class Viterbi:
         dag = np.zeros((len(self.states),len(string)))
         for i in range(len(self.states)):
             dag[i,0] = self.eMatrix[i,self.emissions.get(string[0])]
+        back = {}
         for i in range(1,len(string)):
             for j in range(len(self.states)):
                 temp = []
                 for k in range(len(self.states)):
                     temp.append(dag[k,i-1] * self.tMatrix[k,j])
                 dag[j,i] = max(temp) * self.eMatrix[j,self.emissions.get(string[i])]
-                self.back[dag[j,i]] = temp.index(max(temp))
+                back[dag[j,i]] = temp.index(max(temp))
         p = [dag[:,len(string)-1].argmax(axis=0)]
-        current = dag[:,i].max()
-        for i in range(len(string)-1,0,-1):
-            row = self.back.get(current)
+        current = dag[:,len(string)-1].max()
+        for i in range(len(string)-2,-1,-1):
+            row = back.get(current)
             p.append(row)
             current = dag[row,i]
         return p[::-1]
@@ -75,14 +75,16 @@ def main():
     newLines = []
     for line in lines:
         newLines.append(line.rstrip())
-    states = newLines[2].split()
-    emissions = newLines[4].split()
-    a = newLines[7].split('\t')
-    b = newLines[8].split('\t')
-    c = newLines[11].split('\t')
-    d = newLines[12].split('\t')
-    statesMatrix = np.array([a[1:],b[1:]])
-    emissionsMatrix = np.array([c[1:],d[1:]])
+    emissions = newLines[2].split()
+    states = newLines[4].split()
+    sMatrix = []
+    eMatrix = []
+    for i in range(7,7+len(states)):
+        sMatrix.append(newLines[i].split('\t')[1:])
+    for i in range(9+len(states),9+2*len(states)):
+        eMatrix.append(newLines[i].split('\t')[1:])
+    statesMatrix = np.array(sMatrix)
+    emissionsMatrix = np.array(eMatrix)
     hmm = Viterbi(states,emissions,statesMatrix,emissionsMatrix)
     print(hmm.decoder(hmm.path(newLines[0])))
 

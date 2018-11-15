@@ -11,7 +11,7 @@ Output: probability of the path based on transtion matrix
 initial probability is agnostic
 format of the file should have a string as the first line
 line 3 for the states, space delimited
-line 6,7 for the transition matrix, tab delmited
+line 6+ for the transition matrix, tab delmited
 '''
 def hiddenPath(string,states,matrix):
     '''
@@ -36,9 +36,10 @@ def main():
     for line in lines:
         newLines.append(line.rstrip())
     states = newLines[2].split()
-    a = newLines[5].split('\t')
-    b = newLines[6].split('\t')
-    matrix = np.array([a[1:],b[1:]])
+    sMatrix = []
+    for i in range(5,5+len(states)):
+        sMatrix.append(newLines[i].split('\t')[1:])
+    matrix = np.array(sMatrix)
     print(hiddenPath(newLines[0],states,matrix))
 
 if __name__ == '__main__':

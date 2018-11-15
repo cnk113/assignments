@@ -9,7 +9,7 @@ import numpy as np
 Takes in the stdin file and parses for the transition and emission matrix
 file should have input emission string as the first line
 emissions on line 3, states on line 7 both are space delimited
-matrix on line 10 and 11 tab delimited
+matrix on line 10+ tab delimited
 '''
 def hiddenPath(string, alphabet, transition, states, matrix):
     '''
@@ -37,12 +37,13 @@ def main():
     newLines = []
     for line in lines:
         newLines.append(line.rstrip())
-    alphabet = newLines[2].split()
+    emissions = newLines[2].split()
     states = newLines[6].split()
-    a = newLines[9].split('\t')
-    b = newLines[10].split('\t')
-    matrix = np.array([a[1:],b[1:]])
-    print(hiddenPath(newLines[0],alphabet,newLines[4],states,matrix))
+    matrix = []
+    for i in range(9,9+len(states)):
+        matrix.append(newLines[i].split('\t')[1:])
+    emissionsMatrix = np.array(matrix)
+    print(hiddenPath(newLines[0],emissions,newLines[4],states,emissionsMatrix))
 
 if __name__ == '__main__':
     main()
