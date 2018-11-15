@@ -5,6 +5,11 @@
 import sys
 import numpy as np
 
+'''
+program takes in stdin file with the necessary informtion such as transition and emission matrices
+to be able to compute a hidden path take by the emission
+prints out the most likely hidden path taken
+'''
 class Viterbi:
     '''
     Implementation of the Viterbi algorithm
@@ -51,6 +56,8 @@ class Viterbi:
 
     def decoder(self,string):
         '''
+        Input: list of indices of the rows
+        Output: translates the indices to states
         '''
         decoded = ''
         for i in string:

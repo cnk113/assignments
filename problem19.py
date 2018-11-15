@@ -6,8 +6,10 @@ import sys
 import numpy as np
 
 '''
-Input: text file with emission matrix, transition matrix, states, emissions
+Input: text file with emission matrix, transition matrix, states, emissions (through stdin)
 Output: probability of the emission
+program computes the probability of the emission based on all possible paths taken
+prints out the probability
 '''
 class HiddenMarkovModel:
     '''
@@ -31,6 +33,7 @@ class HiddenMarkovModel:
     def emissionProbability(self,string):
         '''
         takes in the emission and calculates the probability of the emission
+        sums up the preceding states for the score of the current node
         uses dynamic programming
         '''
         dag = np.zeros((len(self.states),len(string)))
