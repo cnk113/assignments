@@ -20,7 +20,7 @@ class DirectedAcyclicGraph:
         '''
         self.adj = {}
         self.incoming = {}
-        self.score = {}
+        self.degree = {}
 
     def insert(self,nodes):
         '''
@@ -40,30 +40,22 @@ class DirectedAcyclicGraph:
         else:
             self.incoming[nextNode] = [[w,current]]
      
-    def topologicalSort(self,start):
+    def topologicalSort(self):
         '''
         topological sorting using khans algorithm, uses degrees instead of edge destruction
         '''
-        degree = {}
         for key in self.adj:
-            degree[key] = 0
-        for key in self.adj:
-            nodes = self.adj.get(key)
-            for node in nodes:
-                if node not in degree:
-                    degree[node] = 1
-                else:
-                    degree[node] += 1
+            self.degree[key] = 0
+        for key in self.incoming:
+            self.degree[key] = 0
+        for key in self.incoming:
+            self.degree[key] += len(self.incoming.get(key))
+        copied = self.degree.copy()
         top = []
         stack = []
-        for node in degree:
-            if degree.get(node) == 0:
+        for node in self.degree:
+            if copied.get(node) == 0:
                 stack.append(node)
-                if node != start:
-                    self.score[node] = -inf # Sets the score of the start nodes at -inf
-                else:
-                    self.score[node] = 0 # Only the start node is set to 0
-        removal = stack.copy()
         while len(stack) != 0:
             current = stack.pop()
             top.append(current)
@@ -71,11 +63,9 @@ class DirectedAcyclicGraph:
             if nodes == None:
                 continue
             for node in nodes:
-                degree[node] -= 1
-                if degree.get(node) == 0:
+                copied[node] -= 1
+                if copied.get(node) == 0:
                     stack.append(node)
-        for node in removal: # Removes all start nodes since they already have a score
-            top.remove(node)
         return top
 
     def longestPath(self,top,start,end):
@@ -83,20 +73,27 @@ class DirectedAcyclicGraph:
         scores the highest incoming weight of each node
         returns the path from the end node to start node
         '''
+        score = {}
+        source = {}
         for node in top:
-            incoming = self.incoming.get(node)
-            highest = incoming[0]
-            for nodes in incoming:
-                if self.score.get(highest[1]) < self.score.get(nodes[1]):
-                    highest = nodes
-            self.score[node] = int(highest[0]) + self.score.get(highest[1])
-            self.incoming[node] = highest
+            if node == start:
+                score[node] = 0
+            elif self.degree.get(node) == 0 and node != start:
+                score[node] = -inf
+            else:
+                incoming = self.incoming.get(node)
+                highest = incoming[0]
+                for nodes in incoming:
+                    if score.get(highest[1]) + int(highest[0]) < score.get(nodes[1]) + int(nodes[0]):
+                        highest = nodes
+                score[node] = int(highest[0]) + score.get(highest[1])
+                source[node] = highest[1]
         current = end
         path = current
         while current != start:
-            path = self.incoming.get(current)[1] + '->' + path
-            current = self.incoming.get(current)[1]
-        return (self.score.get(end),path)
+            path = source.get(current) + '->' + path
+            current = source.get(current)
+        return (score.get(end),path)
         
     
 def main():
@@ -110,7 +107,7 @@ def main():
     dag = DirectedAcyclicGraph()
     for node in new[2:]:
         dag.insert(node)
-    path = dag.longestPath(dag.topologicalSort(new[0]),new[0],new[1])
+    path = dag.longestPath(dag.topologicalSort(),new[0],new[1])
     print(path[0])
     print(path[1])
 
