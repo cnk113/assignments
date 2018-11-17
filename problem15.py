@@ -35,19 +35,17 @@ class DirectedAcyclicGraph:
             self.adj.get(current).append(nextNode)
         else:
             self.adj[current] = [nextNode]
+            self.degree[current] = 0
         if nextNode in self.incoming:
             self.incoming.get(nextNode).append([w,current])
         else:
             self.incoming[nextNode] = [[w,current]]
+            self.degree[nextNode] = 0
      
     def topologicalSort(self):
         '''
         topological sorting using khans algorithm, uses degrees instead of edge destruction
         '''
-        for key in self.adj:
-            self.degree[key] = 0
-        for key in self.incoming:
-            self.degree[key] = 0
         for key in self.incoming:
             self.degree[key] += len(self.incoming.get(key))
         copied = self.degree.copy()
