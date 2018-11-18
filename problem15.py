@@ -16,7 +16,9 @@ class DirectedAcyclicGraph:
     def __init__(self):
         '''
         graph has three dicts: one for adjacent nodes, 
-        one for incoming nodes (includes weights), and last for the overall score (highest weight from incoming)
+        one for incoming nodes (includes weights),
+        one for the indegrees of the node
+        one for the overall score (highest weight from incoming and the score of the incoming node)
         '''
         self.adj = {}
         self.incoming = {}
@@ -86,12 +88,18 @@ class DirectedAcyclicGraph:
                         highest = nodes
                 score[node] = int(highest[0]) + score.get(highest[1])
                 source[node] = highest[1]
+                if node == end:
+                    break;
         current = end
-        path = current
+        path = [current]
         while current != start:
-            path = source.get(current) + '->' + path
             current = source.get(current)
-        return (score.get(end),path)
+            path.append(current)
+        path = path[::-1]
+        route = path[0]
+        for i in range(1,len(path)):
+            route += '->' + path[i]
+        return (score.get(end),route)
         
     
 def main():
