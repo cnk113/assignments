@@ -16,35 +16,37 @@ class Viterbi:
     Input: emission matrix, state matrix, emissions, and states
     Output: hidden path
     '''
-    def __init__(self,states,emissions,sM,eM):
+    def __init__(self,states,emissions):
         '''
         sets the class variables:
         emission matrix, state matrix, state dict of the index to label, emission dict of label to index
         '''
-        self.tMatrix = sM.astype(np.float)
-        self.eMatrix = eM.astype(np.float)
-        self.states = {}
-        self.emissions = {}
+        self.states = states
+        self.emission = emissions
+        self.stateDict = {}
+        self.emissionDict = {}
         for i in range(len(states)):
-            self.states[i] = states[i]
+            self.stateDict[i] = states[i]
         for i in range(len(emissions)):
-            self.emissions[emissions[i]] = i
+            self.emissionDict[emissions[i]] = i
 
-    def path(self,string):
+    def path(self,string,matrices):
         '''
         finds the hidden path taken by the input string
         backtracks and returns the hidden path taken
         '''
+        tMatrix = matrices[0]
+        eMatrix = matrices[1]
         dag = np.zeros((len(self.states),len(string)))
         for i in range(len(self.states)):
-            dag[i,0] = self.eMatrix[i,self.emissions.get(string[0])]
-        back = {}
+            dag[i,0] = eMatrix[i,self.emissionDict.get(string[0])]
+        back = {} # back pointer
         for i in range(1,len(string)):
             for j in range(len(self.states)):
                 temp = []
                 for k in range(len(self.states)):
-                    temp.append(dag[k,i-1] * self.tMatrix[k,j])
-                dag[j,i] = max(temp) * self.eMatrix[j,self.emissions.get(string[i])]
+                    temp.append(dag[k,i-1] * tMatrix[k,j])
+                dag[j,i] = max(temp) * eMatrix[j,self.emissionDict.get(string[i])]
                 back[dag[j,i]] = temp.index(max(temp))
         p = [dag[:,len(string)-1].argmax(axis=0)]
         current = dag[:,len(string)-1].max()
@@ -52,13 +54,13 @@ class Viterbi:
             row = back.get(current)
             p.append(row)
             current = dag[row,i]
-        p[::-1]
+        p = p[::-1]
         decoded = ''
         for i in p:
-            decoded += self.states[i]
+            decoded += self.stateDict[i]
         return decoded
 
-    def maximize(self,string):
+    def estimate(self,emissions,transitions):
         '''
         '''
         occurences = {}
@@ -68,7 +70,7 @@ class Viterbi:
             for k in self.emission:
                 occurences[i+k] = 0
         for i in range(len(transitions)-1):
-            occurences[transitions[i:i+1]] += 1
+            occurences[transitions[i:i+2]] += 1
         for i in range(len(emissions)):
             occurences[transitions[i]+emissions[i]] += 1
         tMatrix = []
@@ -80,17 +82,29 @@ class Viterbi:
                 value = occurences.get(i+j)
                 total += value
                 tRow.append(value)
-            divided = [x / total for x in tRow]
-            tMatrix.append(divided)
+            if total == 0:
+                for x in range(len(tRow)):
+                    tRow[x] = 1
+                total = len(self.states)
+            for j in range(len(tRow)):
+                if tRow[j] != 0:
+                   tRow[j] = tRow[j]/total
+            tMatrix.append(tRow)
             total = 0
             eRow = []
             for k in self.emission:
                 value = occurences.get(i+k)
                 total += value
                 eRow.append(value)
-            divided = [x / total for x in eRow]
-            eMatrix.append(divided)
-        return (tMatrix,eMatrix)
+            if total == 0:
+                for x in range(len(eRow)):
+                    eRow[x] = 1
+                total = len(self.emission)
+            for k in range(len(eRow)):
+                if eRow[k] != 0:
+                   eRow[k] = eRow[k]/total
+            eMatrix.append(eRow)
+        return(np.array(tMatrix),np.array(eMatrix))
 
 def main():
     '''
@@ -103,17 +117,31 @@ def main():
     newLines = []
     for line in lines:
         newLines.append(line.rstrip())
-    emissions = newLines[2].split()
-    states = newLines[4].split()
+    emissions = newLines[4].split()
+    states = newLines[6].split()
     sMatrix = []
     eMatrix = []
     for i in range(9,9+len(states)):
-        sMatrix.append(newLines[i].split('\t')[1:])
+        sMatrix.append(newLines[i].split()[1:])
     for i in range(11+len(states),11+2*len(states)):
-        eMatrix.append(newLines[i].split('\t')[1:])
+        eMatrix.append(newLines[i].split()[1:])
     statesMatrix = np.array(sMatrix)
+    statesMatrix = statesMatrix.astype(np.float)
     emissionsMatrix = np.array(eMatrix)
-    hmm = Viterbi(states,emissions,statesMatrix,emissionsMatrix)
+    emissionsMatrix = emissionsMatrix.astype(np.float)
+    hmm = Viterbi(states,emissions)
+    matrices = hmm.estimate(newLines[2],hmm.path(newLines[2],(statesMatrix,emissionsMatrix)))
+    for i in range(int(newLines[0])-1):
+        matrices = hmm.estimate(newLines[2],hmm.path(newLines[2],matrices))
+    print('\t' + '\t'.join(states))
+    for i in range(len(states)):
+        line = '\t'.join(str(x) for x in matrices[0][i])
+        print(states[i] + '\t' + line)
+    print('--------')
+    print('\t' + '\t'.join(emissions))
+    for i in range(len(states)):
+        line = '\t'.join(str(x) for x in matrices[1][i])
+        print(states[i] + '\t' + line)
 
 if __name__ == "__main__":
     main()

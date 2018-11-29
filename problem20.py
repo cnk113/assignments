@@ -11,12 +11,14 @@ class HiddenMarkovModel:
     '''
     def __init__(self,emission,states):
         '''
+        instantiates the emissions and states
         '''
         self.emission = emission
         self.states = states
 
-    def estimate(emissions,transitions):
+    def estimate(self,emissions,transitions):
         '''
+
         '''
         occurences = {}
         for i in self.states:
@@ -25,7 +27,7 @@ class HiddenMarkovModel:
             for k in self.emission:
                 occurences[i+k] = 0
         for i in range(len(transitions)-1):
-            occurences[transitions[i:i+1]] += 1
+            occurences[transitions[i:i+2]] += 1
         for i in range(len(emissions)):
             occurences[transitions[i]+emissions[i]] += 1
         tMatrix = []
@@ -37,37 +39,53 @@ class HiddenMarkovModel:
                 value = occurences.get(i+j)
                 total += value
                 tRow.append(value)
-            divided = [x / total for x in tRow]
-            tMatrix.append(divided)
+            if total == 0:
+                for x in range(len(tRow)):
+                    tRow[x] = 1
+                total = len(self.states)
+            for j in range(len(tRow)):
+                if tRow[j] != 0:
+                   tRow[j] = tRow[j]/total
+            tMatrix.append(tRow)
             total = 0
             eRow = []
             for k in self.emission:
                 value = occurences.get(i+k)
                 total += value
                 eRow.append(value)
-            divided = [x / total for x in eRow]
-            eMatrix.append(divided)
+            if total == 0:
+                for x in range(len(eRow)):
+                    eRow[x] = 1
+                total = len(self.emission)
+            for k in range(len(eRow)):
+                if eRow[k] != 0:
+                   eRow[k] = eRow[k]/total
+            eMatrix.append(eRow)
         return (tMatrix,eMatrix)
 
 def main():
     '''
+    formats the input into the emissions and transitions
+    print formats to tabs between matrix values
+    creates the object and runs the estimation of parameters
     '''
     lines = sys.stdin.readlines()
     newLines = []
     for line in lines:
         newLines.append(line.rstrip())
-    states = newLines[2].split()
-    emission = newLines[6].split()
+    states = newLines[6].split()
+    emission = newLines[2].split()
     hmm = HiddenMarkovModel(emission,states)
     matrices = hmm.estimate(newLines[0],newLines[4])
-    print(newLines[6])
+    print('\t' + '\t'.join(newLines[6]))
     for i in range(len(states)):
-        line = ''.join(for value in matrices[0])
-        print(states[i] + '\t' + 
+        line = '\t'.join(str(x) for x in matrices[0][i])
+        print(states[i] + '\t' + line)
     print('--------')
-    print(newLines[2])
-    for row in matrices[1]:
-
+    print('\t' + '\t'.join(newLines[2]))
+    for i in range(len(states)):
+        line = '\t'.join(str(x) for x in matrices[1][i])
+        print(states[i] + '\t' + line)
 
 if __name__ == '__main__':
     main()   

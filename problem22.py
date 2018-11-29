@@ -23,8 +23,8 @@ class HiddenMarkovModel:
         sets the class variables of the matrices, states, and emissions
         also sets up the emissions to the indices of the emission matrix
         '''
-        self.tMatrix = sM.astype(np.float)
-        self.eMatrix = eM.astype(np.float)
+        self.tMatrix = sM
+        self.eMatrix = eM
         self.states = states
         self.emissions = {}
         for i in range(len(emissions)):
@@ -36,16 +36,29 @@ class HiddenMarkovModel:
         sums up the preceding states for the score of the current node
         uses dynamic programming
         '''
-        dag = np.zeros((len(self.states),len(string)))
-        for i in range(len(self.states)):
-            dag[i,0] = self.eMatrix[i,self.emissions.get(string[0])]
-        for i in range(1,len(string)):
+        forward = self.forwardBackward(string)
+        backward = self.forwardBackward(string[::-1])
+        matrix = []
+        for i in range(len(string)):
+            row = []
             for j in range(len(self.states)):
+                row.append(forward[j,i] * backward[j,len(string)-i-1] / (np.sum(forward[:,len(string)-1],axis=0)/len(self.states)))
+            matrix.append(row)
+        return matrix
+
+    def forwardBackward(self,string):
+        '''
+        '''
+        dag = np.zeros((len(self.states),len(string)))
+        for i in range(len(self.states)): # initializes first column
+            dag[i,0] = self.eMatrix[i,self.emissions.get(string[0])]
+        for i in range(1,len(string)): # column
+            for j in range(len(self.states)): # row
                 prod = 0
-                for k in range(len(self.states)):
-                    prod += (dag[k,i-1] * self.tMatrix[k,j])
+                for k in range(len(self.states)): # previous column
+                    prod += (dag[k,i-1] * self.tMatrix[k,j]) # sum the products of prev column
                 dag[j,i] = prod * self.eMatrix[j,self.emissions.get(string[i])]
-        return np.sum(dag[:,len(string)-1],axis=0)/len(self.states)
+        return dag
 
 def main():
     '''
@@ -61,16 +74,16 @@ def main():
     sMatrix = []
     eMatrix = []
     for i in range(7,7+len(states)):
-        sMatrix.append(newLines[i].split('\t')[1:])
+        sMatrix.append(newLines[i].split()[1:])
     for i in range(9+len(states),9+2*len(states)):
-        eMatrix.append(newLines[i].split('\t')[1:])
+        eMatrix.append(newLines[i].split()[1:])
     statesMatrix = np.array(sMatrix)
     emissionsMatrix = np.array(eMatrix)
-    hmm = HiddenMarkovModel(emissions,states,statesMatrix,emissionsMatrix)
-    probs = hmm.emissionsProbability(newLines[0])
-    print(states)
-    for step in probs:
-        print(hmm.emissionProbability(newLines[0]))
+    hmm = HiddenMarkovModel(emissions,states,statesMatrix.astype(np.float),emissionsMatrix.astype(np.float))
+    matrix = hmm.emissionProbability(newLines[0])
+    print('\t'.join(states))
+    for row in matrix:
+        print('\t'.join(row))
 
 
 if __name__ == '__main__':
