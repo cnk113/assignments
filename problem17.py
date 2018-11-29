@@ -11,21 +11,31 @@ file should have input emission string as the first line
 emissions on line 3, states on line 7 both are space delimited
 matrix on line 10+ tab delimited
 '''
-def hiddenPath(string, alphabet, transition, states, matrix):
+class HiddenMarkovModel:
     '''
-    Input: string, emissions, states, transition matrix
-    Output: probability of the emission based on the transition states
+    HiddenMarkovModel class that finds probability of emission
+    based on transitions
     '''
-    d = {}
-    matrix = matrix.astype(np.float)
-    for i in range(len(alphabet)):
-        d[alphabet[i]] = i
-    for i in range(len(states)):
-        d[states[i]] = i
-    prob = matrix[d.get(transition[0]),d.get(string[0])]
-    for i in range(1,len(string)):
-        prob *= matrix[d.get(transition[i]),d.get(string[i])]
-    return prob
+    def __init__(self,emissions,states,matrix):
+        '''
+        instantiates the emissions matrix, dictionary of states and emissions to index values of the matrix
+        '''
+        self.values = {}
+        self.matrix = matrix
+        for i in range(len(states)):
+            self.values[states[i]] = i
+        for i in range(len(emissions)):
+            self.values[emissions[i]] = i
+
+    def hiddenPath(self,string,transition):
+        '''
+        Input: string, emissions, states, transition matrix
+        Output: probability of the emission based on the transition states
+        '''
+        prob = self.matrix[self.values.get(transition[0]),self.values.get(string[0])]
+        for i in range(1,len(string)):
+            prob *= self.matrix[self.values.get(transition[i]),self.values.get(string[i])]
+        return prob
 
 def main():
     '''
@@ -41,9 +51,11 @@ def main():
     states = newLines[6].split()
     matrix = []
     for i in range(9,9+len(states)):
-        matrix.append(newLines[i].split('\t')[1:])
+        matrix.append(newLines[i].split()[1:])
     emissionsMatrix = np.array(matrix)
-    print(hiddenPath(newLines[0],emissions,newLines[4],states,emissionsMatrix))
+    emissionsMatrix = emissionsMatrix.astype(np.float)
+    hmm = HiddenMarkovModel(emissions,states,emissionsMatrix)
+    print(hmm.hiddenPath(newLines[0],newLines[4]))
 
 if __name__ == '__main__':
     main()
