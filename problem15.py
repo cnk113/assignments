@@ -78,7 +78,7 @@ class DirectedAcyclicGraph:
         for node in top:
             if node == start:
                 score[node] = 0
-            elif self.degree.get(node) == 0 and node != start:
+            elif self.degree.get(node) == 0:
                 score[node] = -inf
             else:
                 incoming = self.incoming.get(node)

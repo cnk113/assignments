@@ -13,18 +13,28 @@ format of the file should have a string as the first line
 line 3 for the states, space delimited
 line 6+ for the transition matrix, tab delmited
 '''
-def hiddenPath(string,states,matrix):
+class HiddenMarkovModel:
     '''
-    calculates the probability of the string based on the transition matrix
+    HiddenMarkovModel class that can calculate the probability
+    of the hidden path
     '''
-    d = {}
-    matrix = matrix.astype(np.float)
-    for i in range(len(states)):
-        d[states[i]] = i
-    prob = .5
-    for i in range(1,len(string)):
-        prob *= matrix[d[string[i-1]],d[string[i]]]
-    return prob
+    def __init__(self,states,matrix):
+        '''
+        instantiates the transition matrix and states to index dictionary
+        '''
+        self.states = {}
+        self.matrix = matrix
+        for i in range(len(states)):
+            self.states[states[i]] = i
+
+    def hiddenPath(self,string):
+        '''`
+        calculates the probability of the string based on the transition matrix
+        '''
+        prob = 1/len(self.states)
+        for i in range(1,len(string)):
+            prob *= self.matrix[self.states[string[i-1]],self.states[string[i]]]
+        return prob
 
 def main():
     '''
@@ -38,9 +48,11 @@ def main():
     states = newLines[2].split()
     sMatrix = []
     for i in range(5,5+len(states)):
-        sMatrix.append(newLines[i].split('\t')[1:])
+        sMatrix.append(newLines[i].split()[1:])
     matrix = np.array(sMatrix)
-    print(hiddenPath(newLines[0],states,matrix))
+    matrix = matrix.astype(np.float)
+    hmm = HiddenMarkovModel(states,matrix)
+    print(hmm.hiddenPath(newLines[0]))
 
 if __name__ == '__main__':
     main()
