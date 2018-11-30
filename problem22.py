@@ -36,29 +36,31 @@ class HiddenMarkovModel:
         sums up the preceding states for the score of the current node
         uses dynamic programming
         '''
-        forward = self.forwardBackward(string)
-        backward = self.forwardBackward(string[::-1])
-        matrix = []
-        for i in range(len(string)):
-            row = []
-            for j in range(len(self.states)):
-                row.append(forward[j,i] * backward[j,len(string)-i-1] / (np.sum(forward[:,len(string)-1],axis=0)/len(self.states)))
-            matrix.append(row)
-        return matrix
-
-    def forwardBackward(self,string):
-        '''
-        '''
-        dag = np.zeros((len(self.states),len(string)))
+        forward = np.zeros((len(self.states),len(string)))
         for i in range(len(self.states)): # initializes first column
-            dag[i,0] = self.eMatrix[i,self.emissions.get(string[0])]
+            forward[i,0] = self.eMatrix[i,self.emissions.get(string[0])]
         for i in range(1,len(string)): # column
             for j in range(len(self.states)): # row
                 prod = 0
                 for k in range(len(self.states)): # previous column
-                    prod += (dag[k,i-1] * self.tMatrix[k,j]) # sum the products of prev column
-                dag[j,i] = prod * self.eMatrix[j,self.emissions.get(string[i])]
-        return dag
+                    prod += forward[k,i-1] * self.tMatrix[k,j] # sum the products of prev column
+                forward[j,i] = prod * self.eMatrix[j,self.emissions.get(string[i])]
+        backward = np.zeros((len(self.states),len(string)))
+        for i in range(len(self.states)): # initializes first column
+            backward[i,-1] = self.eMatrix[i,self.emissions.get(string[-1])]
+        for i in range(len(string)-2,-1,-1): # column
+            for j in range(len(self.states)): # row
+                prod = 0
+                for k in range(len(self.states)): # previous column
+                    prod += backward[k,i+1] * self.tMatrix[k,j] # sum the products of prev column
+                backward[j,i] = prod * self.eMatrix[j,self.emissions.get(string[i])]
+        matrix = []
+        for i in range(len(string)):
+            row = []
+            for j in range(len(self.states)):
+                row.append((forward[j,i]/len(self.states) * backward[j,i]) / ((np.sum(forward[:,len(string)-1],axis=0)/len(self.states)) * self.eMatrix[j,self.emissions.get(string[i])]))
+            matrix.append(row)
+        return matrix
 
 def main():
     '''
@@ -83,7 +85,7 @@ def main():
     matrix = hmm.emissionProbability(newLines[0])
     print('\t'.join(states))
     for row in matrix:
-        print('\t'.join(row))
+        print('\t'.join(str(x) for x in row))
 
 
 if __name__ == '__main__':
