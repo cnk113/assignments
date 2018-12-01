@@ -30,7 +30,14 @@ class HiddenMarkovModel:
         for i in range(len(emissions)):
             self.emissions[emissions[i]] = i
 
-    def emissionProbability(self,string):
+    def maximization(self,string,matrices):
+        '''
+        '''
+        for i in range(len(string)):
+            for j in range(len(self.states):
+
+
+    def expectation(self,string):
         '''
         takes in the emission and calculates the probability of the emission
         sums up the preceding states for the score of the current node
@@ -54,13 +61,16 @@ class HiddenMarkovModel:
                 for k in range(len(self.states)): # previous column
                     prod += backward[k,i+1] * self.tMatrix[j,k] # sum the products of prev column
                 backward[j,i] = prod * self.eMatrix[j,self.emissions.get(string[i])]
-        matrix = []
+        nodeMatrix = np.zeros((len(self.states),len(string)))
         for i in range(len(string)):
-            row = []
             for j in range(len(self.states)):
-                row.append((forward[j,i] * backward[j,i]) / (np.sum(forward[:,len(string)-1],axis=0) * self.eMatrix[j,self.emissions.get(string[i])]))
-            matrix.append(row)
-        return matrix
+                nodeMatrix[j,i] = (forward[j,i] * backward[j,i] / (np.sum(forward[:,len(string)-1],axis=0) * self.eMatrix[j,self.emissions.get(string[i])]))
+        edgeMatrix = np.zeros((len(self.states)**2,len(string)))
+        for i in range(len(string)-1):
+            for j in range(len(self.states)):
+                for k in range(len(self.states)):
+                    edgeMatrix[j+k,i] = forward[j,i] * backward[k,i+1] * self.tMatrix[j,k] / (np.sum(forward[:,len(string)-1],axis=0) * self.eMatrix[j,self.emissions.get(string[i])])
+        return (nodeMatrix,edgeMatrix)
 
 def main():
     '''
@@ -71,8 +81,8 @@ def main():
     newLines = []
     for line in lines:
         newLines.append(line.rstrip())
-    emissions = newLines[2].split()
-    states = newLines[4].split()
+    emissions = newLines[4].split()
+    states = newLines[6].split()
     sMatrix = []
     eMatrix = []
     for i in range(7,7+len(states)):
@@ -82,10 +92,6 @@ def main():
     statesMatrix = np.array(sMatrix)
     emissionsMatrix = np.array(eMatrix)
     hmm = HiddenMarkovModel(emissions,states,statesMatrix.astype(np.float),emissionsMatrix.astype(np.float))
-    matrix = hmm.emissionProbability(newLines[0])
-    print('\t'.join(states))
-    for row in matrix:
-        print('\t'.join(str(x) for x in row))
 
 
 if __name__ == '__main__':
