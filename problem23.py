@@ -6,76 +6,99 @@ import sys
 import numpy as np
 
 '''
-Input: text file with emission matrix, transition matrix, states, emissions (through stdin)
-Output: probability of the emission
-program computes the probability of the emission based on all possible paths taken
-prints out the probability
+Input: text file with iterations, emission matrix, transition matrix, states, emissions (through stdin)
+Output: new transition and emission matrices through Baum Welch learning over given iterations
 '''
 class HiddenMarkovModel:
     '''
     Hidden Markov Model object with class variables with:
-    emission matrix, transition matrix, states, emissions
-    Input: emissions
-    Output: probability of the input
+    transition states, emissions
+    implements Baum Welch learning
     '''
-    def __init__(self,emissions,states,sM,eM):
+    def __init__(self,emissions,states):
         '''
         sets the class variables of the matrices, states, and emissions
         also sets up the emissions to the indices of the emission matrix
         '''
-        self.tMatrix = sM
-        self.eMatrix = eM
         self.states = states
-        self.emissions = {}
+        self.emissions = emissions
+        self.emissionDict = {}
         for i in range(len(emissions)):
-            self.emissions[emissions[i]] = i
+            self.emissionDict[emissions[i]] = i
+        self.edgePair = {} # Used in edge responsibility matrix
+        pairs = []
+        for i in range(len(states)):
+            for j in range(len(states)):
+                pairs.append(str(i)+str(j))
+        for i in range(len(pairs)):
+            self.edgePair[pairs[i]] = i
 
     def maximization(self,string,matrices):
         '''
+        recomputes the matrices by maximizing over the node and edge responsibility matrix
         '''
-        for i in range(len(string)):
-            for j in range(len(self.states):
+        nodeMatrix = matrices[0]
+        eMatrix = np.zeros((len(self.states),len(self.emissions)))
+        for i in range(len(self.states)):
+            for j in range(len(self.emissions)):
+                prob = 0
+                for k in range(len(string)):
+                    if string[k] == self.emissions[j]: # Too lazy to make dictionary for optimization
+                        prob += nodeMatrix[i,k]
+                eMatrix[i,j] = prob 
+        eMatrix = (eMatrix.T/eMatrix.sum(axis=1)).T # Divides by total
+        edgeMatrix = matrices[1]
+        tMatrix = np.zeros((len(self.states),len(self.states)))
+        for i in range(len(self.states)):
+            for j in range(len(self.states)):
+                prob = 0
+                for k in range(len(string)):
+                    prob += edgeMatrix[self.edgePair.get(str(i)+str(j)),k]
+                tMatrix[i,j] = prob
+        tMatrix = (tMatrix.T/tMatrix.sum(axis=1)).T
+        return (eMatrix,tMatrix)
 
-
-    def expectation(self,string):
+    def expectation(self,string,matrices):
         '''
-        takes in the emission and calculates the probability of the emission
-        sums up the preceding states for the score of the current node
-        uses dynamic programming
+        calculates the node and edge matrices by the expected valueof the emitted string given from the emission
+        and tranisition matrices
         '''
+        tMatrix = matrices[1]
+        eMatrix = matrices[0]
         forward = np.zeros((len(self.states),len(string)))
         for i in range(len(self.states)): # initializes first column
-            forward[i,0] = self.eMatrix[i,self.emissions.get(string[0])]
+            forward[i,0] = eMatrix[i,self.emissionDict.get(string[0])]
         for i in range(1,len(string)): # column
             for j in range(len(self.states)): # row
                 prod = 0
                 for k in range(len(self.states)): # previous column
-                    prod += forward[k,i-1] * self.tMatrix[k,j] # sum the products of prev column
-                forward[j,i] = prod * self.eMatrix[j,self.emissions.get(string[i])]
+                    prod += forward[k,i-1] * tMatrix[k,j] # sum the products of prev column
+                forward[j,i] = prod * eMatrix[j,self.emissionDict.get(string[i])]
         backward = np.zeros((len(self.states),len(string)))
         for i in range(len(self.states)): # initializes first column
-            backward[i,-1] = self.eMatrix[i,self.emissions.get(string[-1])]
+            backward[i,-1] = eMatrix[i,self.emissionDict.get(string[-1])]
         for i in range(len(string)-2,-1,-1): # column
             for j in range(len(self.states)): # row
                 prod = 0
                 for k in range(len(self.states)): # previous column
-                    prod += backward[k,i+1] * self.tMatrix[j,k] # sum the products of prev column
-                backward[j,i] = prod * self.eMatrix[j,self.emissions.get(string[i])]
+                    prod += backward[k,i+1] * tMatrix[j,k] # sum the products of prev column
+                backward[j,i] = prod * eMatrix[j,self.emissionDict.get(string[i])]
         nodeMatrix = np.zeros((len(self.states),len(string)))
         for i in range(len(string)):
             for j in range(len(self.states)):
-                nodeMatrix[j,i] = (forward[j,i] * backward[j,i] / (np.sum(forward[:,len(string)-1],axis=0) * self.eMatrix[j,self.emissions.get(string[i])]))
+                nodeMatrix[j,i] = (forward[j,i] * backward[j,i] / (np.sum(forward[:,len(string)-1],axis=0) * eMatrix[j,self.emissionDict.get(string[i])]))
         edgeMatrix = np.zeros((len(self.states)**2,len(string)))
         for i in range(len(string)-1):
             for j in range(len(self.states)):
                 for k in range(len(self.states)):
-                    edgeMatrix[j+k,i] = forward[j,i] * backward[k,i+1] * self.tMatrix[j,k] / (np.sum(forward[:,len(string)-1],axis=0) * self.eMatrix[j,self.emissions.get(string[i])])
+                    edgeMatrix[self.edgePair.get(str(j)+str(k)),i] = forward[j,i] * backward[k,i+1] * tMatrix[j,k] / np.sum(forward[:,len(string)-1],axis=0)
         return (nodeMatrix,edgeMatrix)
 
 def main():
     '''
     parses the input file and creates a HiddenMarkovModel object
-    prints out the probability of the emission string
+    runs the EM algorithm by the given iteration value
+    prints out the newly trained matrices using Baum Welch learning
     '''
     lines = sys.stdin.readlines()
     newLines = []
@@ -85,14 +108,27 @@ def main():
     states = newLines[6].split()
     sMatrix = []
     eMatrix = []
-    for i in range(7,7+len(states)):
+    for i in range(9,9+len(states)):
         sMatrix.append(newLines[i].split()[1:])
-    for i in range(9+len(states),9+2*len(states)):
+    for i in range(11+len(states),11+2*len(states)):
         eMatrix.append(newLines[i].split()[1:])
-    statesMatrix = np.array(sMatrix)
-    emissionsMatrix = np.array(eMatrix)
-    hmm = HiddenMarkovModel(emissions,states,statesMatrix.astype(np.float),emissionsMatrix.astype(np.float))
-
+    statesMatrix = np.array(sMatrix).astype(np.float)
+    emissionsMatrix = np.array(eMatrix).astype(np.float)
+    hmm = HiddenMarkovModel(emissions,states)
+    matrices = hmm.maximization(newLines[2],hmm.expectation(newLines[2],(emissionsMatrix,statesMatrix)))
+    for i in range(int(newLines[0])-1):
+        matrices = hmm.maximization(newLines[2],hmm.expectation(newLines[2],matrices))
+    print('\t' + '\t'.join(states))
+    tMatrix = matrices[1].tolist()
+    for i in range(len(states)):
+        values = '\t'.join(str(x) for x in tMatrix[i])
+        print(states[i] + '\t' + values)
+    print('--------')
+    print('\t' + '\t'.join(emissions))
+    eMatrix = matrices[0].tolist()
+    for i in range(len(states)):
+        values = '\t'.join(str(x) for x in eMatrix[i])
+        print(states[i] + '\t' + values)
 
 if __name__ == '__main__':
     main()

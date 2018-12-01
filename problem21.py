@@ -8,13 +8,13 @@ import numpy as np
 '''
 program takes in stdin file with the necessary informtion such as transition and emission matrices
 to be able to compute a hidden path take by the emission
-prints out the most likely hidden path taken
+prints out the emission and transition matrix of maximized probability of all hidden paths
 '''
 class Viterbi:
     '''
     Implementation of the Viterbi algorithm
     Input: emission matrix, state matrix, emissions, and states
-    Output: hidden path
+    Output: emission and transition matrices
     '''
     def __init__(self,states,emissions):
         '''
@@ -48,20 +48,19 @@ class Viterbi:
                     temp.append(dag[k,i-1] * tMatrix[k,j])
                 dag[j,i] = max(temp) * eMatrix[j,self.emissionDict.get(string[i])]
                 back[dag[j,i]] = temp.index(max(temp))
-        p = [dag[:,len(string)-1].argmax(axis=0)]
+        p = [dag[:,len(string)-1].argmax(axis=0)] 
         current = dag[:,len(string)-1].max()
-        for i in range(len(string)-2,-1,-1):
+        for i in range(len(string)-2,-1,-1): # backtrack
             row = back.get(current)
             p.append(row)
             current = dag[row,i]
-        p = p[::-1]
-        decoded = ''
-        for i in p:
-            decoded += self.stateDict[i]
-        return decoded
+        return (''.join(self.stateDict[i] for i in p[::-1])) # translates the indices of transition matrix to transition state
 
     def estimate(self,emissions,transitions):
         '''
+        calculates the emission and transition matrices by maximizing over
+        probability over all hidden paths
+        SORRY FOR THE SPAGHETTI CODE
         '''
         occurences = {}
         for i in self.states:
@@ -111,7 +110,7 @@ def main():
     parses the stdin file and creates numpy matrices of the emissions and states
     creates the Viterbi object and runs the functions
     Input: file (through stdin)
-    Output: the hidden path
+    Output: prints transition and emission matrices
     '''
     lines = sys.stdin.readlines()
     newLines = []
@@ -125,10 +124,8 @@ def main():
         sMatrix.append(newLines[i].split()[1:])
     for i in range(11+len(states),11+2*len(states)):
         eMatrix.append(newLines[i].split()[1:])
-    statesMatrix = np.array(sMatrix)
-    statesMatrix = statesMatrix.astype(np.float)
-    emissionsMatrix = np.array(eMatrix)
-    emissionsMatrix = emissionsMatrix.astype(np.float)
+    statesMatrix = np.array(sMatrix).astype(np.float)
+    emissionsMatrix = np.array(eMatrix).astype(np.float)
     hmm = Viterbi(states,emissions)
     matrices = hmm.estimate(newLines[2],hmm.path(newLines[2],(statesMatrix,emissionsMatrix)))
     for i in range(int(newLines[0])-1):

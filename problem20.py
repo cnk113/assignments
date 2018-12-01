@@ -5,9 +5,12 @@
 import sys
 
 '''
+takes in stdin file that contains emission and transitions taken
+outputs the transition matrix and emission matrix
 '''
 class HiddenMarkovModel:
     '''
+    HMM class that computes the transition and emission matrix
     '''
     def __init__(self,emission,states):
         '''
@@ -18,7 +21,8 @@ class HiddenMarkovModel:
 
     def estimate(self,emissions,transitions):
         '''
-
+        computes the occurences of transition and emissions
+        creates matrices for transition and emission probabilities
         '''
         occurences = {}
         for i in self.states:
@@ -39,12 +43,12 @@ class HiddenMarkovModel:
                 value = occurences.get(i+j)
                 total += value
                 tRow.append(value)
-            if total == 0:
+            if total == 0: # equal chance since none observed
                 for x in range(len(tRow)):
                     tRow[x] = 1
                 total = len(self.states)
             for j in range(len(tRow)):
-                if tRow[j] != 0:
+                if tRow[j] != 0: # no divide by zero
                    tRow[j] = tRow[j]/total
             tMatrix.append(tRow)
             total = 0
@@ -61,7 +65,7 @@ class HiddenMarkovModel:
                 if eRow[k] != 0:
                    eRow[k] = eRow[k]/total
             eMatrix.append(eRow)
-        return (tMatrix,eMatrix)
+        return (tMatrix,eMatrix) # man this code is unnecessarily long
 
 def main():
     '''

@@ -7,16 +7,14 @@ import numpy as np
 
 '''
 Input: text file with emission matrix, transition matrix, states, emissions (through stdin)
-Output: probability of the emission
-program computes the probability of the emission based on all possible paths taken
-prints out the probability
+Output: probability of the transition state probability at each position in the emission
 '''
 class HiddenMarkovModel:
     '''
     Hidden Markov Model object with class variables with:
     emission matrix, transition matrix, states, emissions
     Input: emissions
-    Output: probability of the input
+    Output: probability of the transitions at each state
     '''
     def __init__(self,emissions,states,sM,eM):
         '''
@@ -30,11 +28,10 @@ class HiddenMarkovModel:
         for i in range(len(emissions)):
             self.emissions[emissions[i]] = i
 
-    def emissionProbability(self,string):
+    def transitionProbability(self,string):
         '''
-        takes in the emission and calculates the probability of the emission
-        sums up the preceding states for the score of the current node
-        uses dynamic programming
+        takes in the emission and calculates the probability of the transition state
+        at each position of the emitted string
         '''
         forward = np.zeros((len(self.states),len(string)))
         for i in range(len(self.states)): # initializes first column
@@ -43,7 +40,7 @@ class HiddenMarkovModel:
             for j in range(len(self.states)): # row
                 prod = 0
                 for k in range(len(self.states)): # previous column
-                    prod += forward[k,i-1] * self.tMatrix[k,j] # sum the products of prev column
+                    prod += forward[k,i-1] * self.tMatrix[k,j] # USE DOT PRODUCTS
                 forward[j,i] = prod * self.eMatrix[j,self.emissions.get(string[i])]
         backward = np.zeros((len(self.states),len(string)))
         for i in range(len(self.states)): # initializes first column
@@ -52,20 +49,19 @@ class HiddenMarkovModel:
             for j in range(len(self.states)): # row
                 prod = 0
                 for k in range(len(self.states)): # previous column
-                    prod += backward[k,i+1] * self.tMatrix[j,k] # sum the products of prev column
+                    prod += backward[k,i+1] * self.tMatrix[j,k] # I should probabily use dot products
                 backward[j,i] = prod * self.eMatrix[j,self.emissions.get(string[i])]
-        matrix = []
+        nodeMatrix = np.zeros((len(self.states),len(string)))
         for i in range(len(string)):
-            row = []
             for j in range(len(self.states)):
-                row.append((forward[j,i] * backward[j,i]) / (np.sum(forward[:,len(string)-1],axis=0) * self.eMatrix[j,self.emissions.get(string[i])]))
-            matrix.append(row)
-        return matrix
+                nodeMatrix[j,i] = (forward[j,i] * backward[j,i]) / (np.sum(forward[:,len(string)-1],axis=0) * self.eMatrix[j,self.emissions.get(string[i])])
+        return nodeMatrix.tolist()
 
 def main():
     '''
     parses the input file and creates a HiddenMarkovModel object
-    prints out the probability of the emission string
+    computes the transition probabilities and
+    prints out the probability of the transition state at each position of emission
     '''
     lines = sys.stdin.readlines()
     newLines = []
@@ -82,10 +78,10 @@ def main():
     statesMatrix = np.array(sMatrix)
     emissionsMatrix = np.array(eMatrix)
     hmm = HiddenMarkovModel(emissions,states,statesMatrix.astype(np.float),emissionsMatrix.astype(np.float))
-    matrix = hmm.emissionProbability(newLines[0])
+    matrix = hmm.transitionProbability(newLines[0])
     print('\t'.join(states))
-    for row in matrix:
-        print('\t'.join(str(x) for x in row))
+    for i in range(len(matrix[0])):
+        print('\t'.join(str(row[i]) for row in matrix))
 
 
 if __name__ == '__main__':
