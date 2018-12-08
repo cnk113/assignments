@@ -5,6 +5,8 @@
 import sys
 
 class EncodedProtein:
+    '''
+    '''
     rnaCodonTable = {
     # RNA codon table
     # U
@@ -29,19 +31,53 @@ class EncodedProtein:
     'GUG': 'V', 'GCG': 'A', 'GAG': 'E', 'GGG': 'G'  # GxG
     }
     dnaCodonTable = {key.replace('U','T'):value for key, value in rnaCodonTable.items()}
-    def __init__(self,string):
-        self.seq = string
-        self.proteins = []
+    def __init__(self,peptide):
+        '''
+        '''
+        self.peptide = peptide
 
-    def getProteins(self):
+    def coordinates(self,string):
+        '''
+        '''
+        start = []
+        stop = []
         for i in range(3):
-            for 
+            for j in range(i,len(self.seq)-i,3):
+                protein = dnaCodonTable.get(self.seq[j:j+3])
+                if protein == 'M' and len(start) == len(stop):
+                    start.append(j)
+                elif protein == '-' and len(start) == len(stop)+1:
+                    stop.append(j)
+        return (start,stop)
+
+    def translatedFrames(self,seq,coord):
+        start = coord[0]
+        stop = coord[1]
+        allProteins = []
+        for i in range(len(stop)):
+            proteins = []
+            for j in range(start[i],stop[i],3):
+                proteins.append(dnaCodonTable.get(seq[j:j+3]))
+            allProteins.append(proteins)
+        for i in range(0,len(allProteins),len(peptide)):
+            if peptide == proteins[i:i+len(peptide)]:
+
+
+    def forwardReverse(self,string):
+        '''
+        '''
+        readingFrames = self.coordinates(string)
+        complement = {'A':'T', 'T':'A', 'C':'G', 'G':'C'}
+        reverseReadingFrames = self.coordinates(''.join(complement[i] for i in string[::-1]))
+
+        
 
 def main():
+    '''
+    '''
     lines = sys.stdin.readlines()
-    newLines = []
-    for line in lines:
-        newLines.append(line.rstrip())
+    encoded = EncodedProtein(lines[1].rstrip)())
+    encoded.forwardReverse(lines[0].rstrip())
 
 
 if __name__ == "__main__":

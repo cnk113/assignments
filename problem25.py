@@ -19,7 +19,7 @@ class Spectrum:
     def combinations(self,seq):
         '''
         '''
-        perms = [''.join(seq[i:]) for i in range(len(seq))]
+        perms = [''.join(permutations(seq[i:])) for i in range(len(seq))]
         for perm in perms:
             if perm not in self.peptides:
                 self.peptides[perm] = 0
