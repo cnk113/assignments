@@ -4,14 +4,20 @@
 
 import sys
 
-def pairwise(l):
+'''
+This program takes input from stdin of a collections of kmers seperated by newlines
+Outputs the overlap graph in an adjacency list through stdout
+'''
+def adjacencyList(string):
     '''
-    pairwise comparison of the prefix and suffix
+    constructs the adjacency list from the prefix of one sequence and
+    suffix of another sequence in the collection
+    returns adjacency list
     '''
     adj = {}
-    for seq in l:
+    for seq in string:
         suffix = seq[1:]
-        for others in l:
+        for others in string:
             prefix = others[:-1]
             if prefix == suffix:
                 adj[seq] = others
@@ -19,16 +25,16 @@ def pairwise(l):
 
 def main():
     '''
-    strips newlines from the list
-    prints out the graph
+    strips newlines from the stdin list
+    prints out the adjacency list to stdout
     '''
-    l = sys.stdin.readlines()
-    new = []
-    for seq in l:
-        new.append(seq.rstrip())
-    adj = pairwise(new)
+    lines = sys.stdin.readlines()
+    newLines = []
+    for seq in lines:
+        newLines.append(seq.rstrip())
+    adj = adjacencyList(newLines)
     for key in adj:
     	print(key + " -> " + adj.get(key))
 
 if __name__ == '__main__':
-	main()
+    main()

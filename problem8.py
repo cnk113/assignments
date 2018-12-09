@@ -4,23 +4,29 @@
 
 import sys
 
-def composition(opts):
+'''
+This program takes in from stdin a file with size of kmer on first line
+And the sequence string on the second line
+Outputs to stdout
+'''
+
+def composition(k,seq):
     '''
-    returns the kmer composition
+    returns the kmer composition at size k
+    uses a sliding window of size k
     '''
-    k = int(opts[0])
-    seq = opts[1]
     lis = []
-    for i in range(len(seq)-k+1):
-        lis.append(seq[i:i+k])
+    for i in range(len(seq)-int(k)+1):
+        lis.append(seq[i:i+int(k)])
     return sorted(lis)
 
 def main():
     '''
-    reads in kmer size and string and outputs composition
+    reads in kmer size from stdin and strips newlines
+    outputs composition to stdout
     '''
-    opts = sys.stdin.readlines()
-    comp = composition(opts)
+    lines = sys.stdin.readlines()
+    comp = composition(lines[0].rstrip(),lines[1].rstrip())
     for s in comp:
         print(s)
 

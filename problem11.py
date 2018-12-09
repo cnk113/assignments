@@ -4,12 +4,18 @@
 
 import sys
 
-def deBrujin(lis):
+'''
+This program takes in from stdin and a string of sequences
+Outputs to stdout the deBrujin graph as an adjacency list
+'''
+
+def deBrujin(k,seq):
     '''
     creates a debrujin adjacency list form from the string
+    nodes k-1 long and kth sequence is the edge
+    returns adjacency list
     '''
-    k = int(lis[0])-1
-    seq = lis[1]
+    k = int(k)-1
     adj = {}
     for i in range(len(seq)-k):
         first = seq[i:i+k]
@@ -22,10 +28,11 @@ def deBrujin(lis):
 
 def main():
     '''
-    
+    reads in fron stdin and strips the lines of newlines
+    runs the deBrujin function and prints out the adjacency lsit
     '''
-    lis = sys.stdin.readlines()
-    adj = deBrujin(lis)
+    lines = sys.stdin.readlines()
+    adj = deBrujin(lines[0].rstrip(),lines[1].rstrip())
     for key in adj:
         print(key + " -> " + adj.get(key))
 
