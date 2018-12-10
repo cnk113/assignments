@@ -4,8 +4,16 @@
 
 import sys
 
+'''
+This program takes in from stdin the DNA string and an amino acid string both seperated by newlines
+OUtputs reading frames that encode the given protein delimited by new lines
+does not take into account stop codons
+'''
+
 class EncodedProtein:
     '''
+    EncodedProtein class has 2 class dictionaries the codon tables for RNA to amino acid
+    and DNA to amino acid
     '''
     rnaCodonTable = {
     # RNA codon table
@@ -33,52 +41,43 @@ class EncodedProtein:
     dnaCodonTable = {key.replace('U','T'):value for key, value in rnaCodonTable.items()}
     def __init__(self,peptide):
         '''
+        takes in the peptide to search for in the DNA sequence
         '''
         self.peptide = peptide
 
-    def coordinates(self,string):
+    def substrings(self,seq):
         '''
+        takes in the DNA sequence and searches for all possible frames that translate to the protein
+        returns all frames seperated by newlines
         '''
-        start = []
-        stop = []
-        for i in range(3):
-            for j in range(i,len(self.seq)-i,3):
-                protein = dnaCodonTable.get(self.seq[j:j+3])
-                if protein == 'M' and len(start) == len(stop):
-                    start.append(j)
-                elif protein == '-' and len(start) == len(stop)+1:
-                    stop.append(j)
-        return (start,stop)
-
-    def translatedFrames(self,seq,coord):
-        start = coord[0]
-        stop = coord[1]
-        allProteins = []
-        for i in range(len(stop)):
-            proteins = []
-            for j in range(start[i],stop[i],3):
-                proteins.append(dnaCodonTable.get(seq[j:j+3]))
-            allProteins.append(proteins)
-        for i in range(0,len(allProteins),len(peptide)):
-            if peptide == proteins[i:i+len(peptide)]:
-
-
-    def forwardReverse(self,string):
-        '''
-        '''
-        readingFrames = self.coordinates(string)
         complement = {'A':'T', 'T':'A', 'C':'G', 'G':'C'}
-        reverseReadingFrames = self.coordinates(''.join(complement[i] for i in string[::-1]))
+        k = len(self.peptide)*3
+        frames = ''
+        for i in range(len(seq)-k+1):
+            frame = seq[i:i+k]
+            reverse = ''.join(complement[i] for i in frame[::-1])
+            if self.translate(frame) == self.peptide or self.translate(reverse) == self.peptide:
+                frames += frame + '\n'
+        return frames.rstrip()
 
-        
+    def translate(self,seq):
+        '''
+        takes in a substring of the DNA sequence to translate to the amino acid using the table
+        returns the amino acid
+        '''
+        aa = ''
+        for i in range(0,len(seq),3):
+            aa += self.dnaCodonTable.get(seq[i:i+3])
+        return aa
 
 def main():
     '''
+    takes in the input from stdin and create the class
+    creates the EncodedProtein class and prints out the frames by newlines
     '''
     lines = sys.stdin.readlines()
-    encoded = EncodedProtein(lines[1].rstrip)())
-    encoded.forwardReverse(lines[0].rstrip())
-
+    encoded = EncodedProtein(lines[1].rstrip())
+    print(encoded.substrings(lines[0].rstrip()))
 
 if __name__ == "__main__":
     main()

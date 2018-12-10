@@ -17,18 +17,25 @@ class Motifs:
     Motifs class
     takes in DNA string and the sizes of kmers to find and filters to a statistical cutoff
     '''
-    def __init__(self, mn, mx, c, t):
+    def __init__(self, mn, mx, c):
         '''
         constructor and sets the class instances
         '''
         self.min = mn
         self.max = mx
-        self.cutoff = c 
-        self.fasta = t
+        self.cutoff = c
+        self.fasta = ''
         self.count = {}
+        self.rev = {}
         self.exp = {}
         self.z = {}
         self.p = {}
+
+    def insertSeq(self,seq):
+        '''
+        insert sequences
+        '''
+        self.fasta += seq
 
     def reverseComplement(self,kmer):
         '''
@@ -42,19 +49,19 @@ class Motifs:
         counts all the kmers and save the kmer and the count to the dictionary
         '''
         for kmerSize in range(self.min-2,self.max+1):
-            for pos in range(len(self.fasta)-kmerSize+1):
+            for pos in range(len(self.fasta)-kmerSize-self.max+1):
                 kmer = self.fasta[pos:pos+kmerSize]
                 if 'N' in kmer:
                     continue
-                rev = self.reverseComplement(kmer)
-                if kmer not in self.count: # Not a palindrome
+                reverse = self.reverseComplement(kmer)
+                if kmer not in self.count:
                     self.count[kmer] = 1
-                    self.count[rev] = 1
-                elif kmer == rev: # Is a palindrome
+                    self.count[reverse] = 1
+                elif reverse == kmer:
                     self.count[kmer] += 1
                 else:
                     self.count[kmer] += 1
-                    self.count[rev] += 1
+                    self.count[reverse] += 1
 
     def zScore(self):
         '''
@@ -65,20 +72,24 @@ class Motifs:
             if len(kmer)>=self.min:
                 if len(kmer) < 3:
                     continue
-                exp = (self.count[kmer[1:]]*self.count[kmer[:-1]])/self.count[kmer[1:-1]] # mean
+                exp = self.count[kmer[1:]]*self.count[kmer[:-1]]/self.count[kmer[1:-1]]
                 sd = math.sqrt(exp*(1-exp/len(self.fasta)))
                 z = (self.count.get(kmer)-exp)/sd
                 self.exp[kmer] = exp
                 self.z[kmer] = z
 
-    def printKmers(self):
+    def search(self):
         '''
-        prints out the filtered kmers and other attributes sorted by p value in increasing value 
-        NOTE: if you're wondering why the printing takes long it is because the p value is calculated as it prints
-        This is faster to calculate since only half the kmers are being calculated as the reverse complemented is filtered out in the same process
+        creates a data structure for the filtered kmers and other attributes sorted by p value in increasing value 
+        lexographic ordering between the reverse complement and kmer
+        returns a list of lists of each kmer, kmer count, expected value, zscore, and p score
         '''
+        self.kmerParse()
+        self.zScore()
         tup = sorted(self.z.items(), key=lambda x: (x[1])) # sorts by z score
         tup = sorted(tup, key=lambda x: len(x[0]), reverse=True) # sorts by kmer length
+        data = []
+        used = []
         for k, v in tup:
             if v <= self.cutoff: # Checks for cutoff zscore
                 rev = self.reverseComplement(k)
@@ -88,8 +99,10 @@ class Motifs:
                     y = k
                 else:
                     y = rev
-                tup.remove((y,v)) # remove the duplicate reverse complements from dictionary
-                print('{0:8}:{1:8}\t{2:0d}\t{3:0.2f}\t{4:0.2f}\t{5:0.2e}'.format(x, y, self.count.get(k), self.exp.get(k), v, binom.cdf(self.count.get(k),len(self.fasta),self.exp.get(k)/len(self.fasta))))
+                if x not in used:
+                    used.append(x)
+                    data.append([x, y, self.count.get(k), self.exp.get(k), v, binom.cdf(self.count.get(k),len(self.fasta),self.exp.get(k)/len(self.fasta))])
+        return data
 
 def parse_args():
     '''
@@ -98,7 +111,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description = 'Finds all possible kmers within a given range and filters based on size of kmer and statistical significance')
     parser.add_argument('--minMotif', type=int, default=3, help='minimum motif length for statisical analysis')
     parser.add_argument('--maxMotif', type=int, default=8, help='maximum motif length for statisical analysis')
-    parser.add_argument('--cutoff', type=int, default=-3, help='statistical value for cutoff')
+    parser.add_argument('--cutoff', type=int, default=-5, help='statistical value for cutoff')
     return parser.parse_args()
 
 def main():
@@ -107,12 +120,15 @@ def main():
     '''
     opts = parse_args()
     reader = fastaReader.FastAreader()
+    motif = Motifs(opts.minMotif,opts.maxMotif,opts.cutoff)
+    total = 0
     for head, seq in reader.readFasta():
-        motif = Motifs(opts.minMotif, opts.maxMotif, opts.cutoff, seq)
-        motif.kmerParse()
-        motif.zScore()
-        print('N = ' + str(len(seq)))
-        motif.printKmers()
+        motif.insertSeq(seq)
+        total += len(seq)
+    motifs = motif.search()
+    print(total-opts.maxMotif)
+    for m in motifs: 
+        print('{0:8}:{1:8}\t{2:0d}\t{3:0.2f}\t{4:0.2f}\t{5:0.2e}'.format(m[0],m[1],m[2],m[3],m[4],m[5]))
 
 if __name__ == "__main__":
     main()
