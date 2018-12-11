@@ -47,13 +47,14 @@ class Viterbi:
                 for k in range(len(self.states)):
                     temp.append(dag[k,i-1] * tMatrix[k,j])
                 dag[j,i] = max(temp) * eMatrix[j,self.emissionDict.get(string[i])]
-                back[dag[j,i]] = temp.index(max(temp))
-        p = [dag[:,len(string)-1].argmax(axis=0)] 
-        current = dag[:,len(string)-1].max()
+                back[str(j)+str(i)] = temp.index(max(temp))
+        sink = dag[:,len(string)-1].argmax(axis=0)
+        current = str(sink)+str(len(string)-1)
+        p = [sink]
         for i in range(len(string)-2,-1,-1): # backtrack
             row = back.get(current)
             p.append(row)
-            current = dag[row,i]
+            current = str(row)+str(i)
         return (''.join(self.stateDict[i] for i in p[::-1])) # translates the indices of transition matrix to transition state
 
     def estimate(self,emissions,transitions):
@@ -105,6 +106,16 @@ class Viterbi:
             eMatrix.append(eRow)
         return(np.array(tMatrix),np.array(eMatrix))
 
+    def viterbiLearning(self,string,sMatrix,eMatrix,num):
+        '''
+        runs viterbi learning over a given number of iterations
+        returns the transition and emission matrix of the resulting iterations
+        '''
+        matrices = (sMatrix,eMatrix)
+        for i in num:
+            matrices = self.estimate(string,self.path(string,matrices))
+        return matrices
+
 def main():
     '''
     parses the stdin file and creates numpy matrices of the emissions and states
@@ -127,9 +138,7 @@ def main():
     statesMatrix = np.array(sMatrix).astype(np.float)
     emissionsMatrix = np.array(eMatrix).astype(np.float)
     hmm = Viterbi(states,emissions)
-    matrices = hmm.estimate(newLines[2],hmm.path(newLines[2],(statesMatrix,emissionsMatrix)))
-    for i in range(int(newLines[0])-1):
-        matrices = hmm.estimate(newLines[2],hmm.path(newLines[2],matrices))
+    matrices = hmm.viterbiLearning(newLines[2],statesMatrix,emissionsMatrix,newLines[0])
     print('\t' + '\t'.join(states))
     for i in range(len(states)):
         line = '\t'.join(str(x) for x in matrices[0][i])

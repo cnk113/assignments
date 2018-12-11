@@ -28,7 +28,7 @@ class HiddenMarkovModel:
         for i in range(len(emissions)):
             self.emissions[emissions[i]] = i
 
-    def transitionProbability(self,string):
+    def softDecoder(self,string):
         '''
         takes in the emission and calculates the probability of the transition state
         at each position of the emitted string
@@ -52,9 +52,10 @@ class HiddenMarkovModel:
                     prod += backward[k,i+1] * self.tMatrix[j,k] # I should probabily use dot products
                 backward[j,i] = prod * self.eMatrix[j,self.emissions.get(string[i])]
         nodeMatrix = np.zeros((len(self.states),len(string)))
+        sink = np.sum(forward[:,len(string)-1],axis=0)
         for i in range(len(string)):
             for j in range(len(self.states)):
-                nodeMatrix[j,i] = (forward[j,i] * backward[j,i]) / (np.sum(forward[:,len(string)-1],axis=0) * self.eMatrix[j,self.emissions.get(string[i])])
+                nodeMatrix[j,i] = (forward[j,i] * backward[j,i]) / (sink * self.eMatrix[j,self.emissions.get(string[i])])
         return nodeMatrix.tolist()
 
 def main():
@@ -78,7 +79,7 @@ def main():
     statesMatrix = np.array(sMatrix)
     emissionsMatrix = np.array(eMatrix)
     hmm = HiddenMarkovModel(emissions,states,statesMatrix.astype(np.float),emissionsMatrix.astype(np.float))
-    matrix = hmm.transitionProbability(newLines[0])
+    matrix = hmm.softDecoder(newLines[0])
     print('\t'.join(states))
     for i in range(len(matrix[0])):
         print('\t'.join(str(row[i]) for row in matrix))

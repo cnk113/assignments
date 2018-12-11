@@ -83,16 +83,27 @@ class HiddenMarkovModel:
                 for k in range(len(self.states)): # previous column
                     prod += backward[k,i+1] * tMatrix[j,k] # sum the products of prev column
                 backward[j,i] = prod * eMatrix[j,self.emissionDict.get(string[i])]
+        total = np.sum(forward[:,len(string)-1],axis=0)
         nodeMatrix = np.zeros((len(self.states),len(string)))
         for i in range(len(string)):
             for j in range(len(self.states)):
-                nodeMatrix[j,i] = (forward[j,i] * backward[j,i] / (np.sum(forward[:,len(string)-1],axis=0) * eMatrix[j,self.emissionDict.get(string[i])]))
+                nodeMatrix[j,i] = (forward[j,i] * backward[j,i] / (total * eMatrix[j,self.emissionDict.get(string[i])]))
         edgeMatrix = np.zeros((len(self.states)**2,len(string)))
         for i in range(len(string)-1):
             for j in range(len(self.states)):
                 for k in range(len(self.states)):
-                    edgeMatrix[self.edgePair.get(str(j)+str(k)),i] = forward[j,i] * backward[k,i+1] * tMatrix[j,k] / np.sum(forward[:,len(string)-1],axis=0)
+                    edgeMatrix[self.edgePair.get(str(j)+str(k)),i] = forward[j,i] * backward[k,i+1] * tMatrix[j,k] / total
         return (nodeMatrix,edgeMatrix)
+
+    def baumWelchLearning(self,string,eMatrix,sMatrix,num):
+        '''
+        runs the Baum Welch algorthim a given number of times
+        returns the matrices after the iterations
+        '''
+        matrices = (eMatrix,sMatrix)
+        for i in num:
+            matrices = self.maximization(string,self.expectation(string,matrices))
+        return matrices
 
 def main():
     '''
@@ -115,9 +126,7 @@ def main():
     statesMatrix = np.array(sMatrix).astype(np.float)
     emissionsMatrix = np.array(eMatrix).astype(np.float)
     hmm = HiddenMarkovModel(emissions,states)
-    matrices = hmm.maximization(newLines[2],hmm.expectation(newLines[2],(emissionsMatrix,statesMatrix)))
-    for i in range(int(newLines[0])-1):
-        matrices = hmm.maximization(newLines[2],hmm.expectation(newLines[2],matrices))
+    matrices = hmm.baumWelchLearning(newLines[2],emissionsMatrix,statesMatrix,newLines[0])
     print('\t' + '\t'.join(states))
     tMatrix = matrices[1].tolist()
     for i in range(len(states)):
