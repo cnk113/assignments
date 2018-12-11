@@ -4,12 +4,22 @@
 
 import sys
 
+'''
+This program takes from stdin of a cyclopeptide's cyclospectrum
+Outputs to stdout all the combinations of the cyclopeptides masses
+'''
+
 class Peptide:
     '''
+    Peptide class that has all masses of amino acids
+    functions to calculate the cyclopeptide based on the cyclospectrum
     '''
     masses = {'G': 57, 'A': 71, 'S': 87, 'P': 97, 'V': 99, 'T': 101, 'C': 103, 'I': 113, 'N': 114,'D': 115, 'K': 128, 'E': 129, 'M': 131, 'H': 137, 'F': 147, 'R': 156, 'Y': 163, 'W': 186}
     def __init__(self,spec):
         '''
+        takes in the cyclospectrum
+        calculates the possible since amino acids the protein can have
+        for use in expand function
         '''
         self.spectrum = []
         for sp in spec:
@@ -24,6 +34,9 @@ class Peptide:
 
     def cyclopeptideSequencing(self):
         '''
+        generates the cyclopeptide from the cyclospectrum
+        uses branch and bound, can be exponential runtime
+        returns a list of masses
         '''
         peptides = self.singlePeptides.copy()
         cyclospec = []
@@ -49,6 +62,7 @@ class Peptide:
     
     def consistent(self,spec):
         '''
+        checks if spectrum is consistent with cyclospectrum
         '''
         for sp in spec:
             if spec.count(sp) > self.spectrum.count(sp):
@@ -57,6 +71,7 @@ class Peptide:
 
     def cyclospectrum(self,seq):
         '''
+        produces and returns cyclospectrum of the amino acid sequence
         '''
         cyclic = seq*2
         peptides = [seq]
@@ -70,6 +85,7 @@ class Peptide:
 
     def getMass(self,peptide):
         '''
+        returns the mass of the peptide
         '''
         spec = 0
         for aa in peptide:
@@ -78,6 +94,8 @@ class Peptide:
 
     def expand(self,peptides):
         '''
+        branches and expands the peptides by appending
+        possible single peptides that can be added onto the spectrum
         '''
         newPeptides = []
         while len(peptides) != 0:
@@ -88,6 +106,9 @@ class Peptide:
 
 def main():
     '''
+    takes in from stdin the cyclospectrum
+    creates the Peptide class and calculates the cyclopeptide masses
+    outputs to stdout
     '''
     spec = sys.stdin.readlines()[0].rstrip()
     peptide = Peptide(spec.split())
