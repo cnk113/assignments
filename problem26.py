@@ -3,6 +3,7 @@
 # Group Members: None
 
 import sys
+from collections import Counter
 
 '''
 This program takes from stdin of a cyclopeptide's cyclospectrum
@@ -24,7 +25,8 @@ class Peptide:
         self.spectrum = []
         for sp in spec:
             self.spectrum.append(int(sp))
-        self.singlePeptides = []
+        self.counter = Counter(self.spectrum)
+        self.singlePeptides = [] # Only possible single AA possible in spectrum
         for sp in self.spectrum:
             if sp > 186:
                 break
@@ -49,23 +51,25 @@ class Peptide:
                 spec = self.cyclospectrum(peptide)
                 if mass == self.spectrum[len(self.spectrum)-1] and spec == self.spectrum:
                     cyclospec.append(peptide)
-                elif self.consistent(spec):
+                elif mass in self.spectrum: # elif self.consistent(spec):
                     newPeptides.append(peptide)
             peptides = newPeptides
-        cyclicMasses = []
-        for pep in cyclospec:
+        cyclicMasses = [] # Gets the weights of AA from the peptides
+        for pep in set(cyclospec):
             weights = []
             for aa in pep:
                 weights.append(self.masses.get(aa))
             cyclicMasses.append(weights)
         return cyclicMasses
-    
+
     def consistent(self,spec):
         '''
-        checks if spectrum is consistent with cyclospectrum
+        checks if the current spectrum is contained within the cyclospectrum
+        doesn't work for some reason
         '''
+        c = Counter(spec)
         for sp in spec:
-            if spec.count(sp) > self.spectrum.count(sp):
+            if c.get(sp) > self.counter.get(sp,0):
                 return False
         return True
 
