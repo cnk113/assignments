@@ -40,11 +40,11 @@ class Peptide:
         uses branch and bound, can be exponential runtime
         returns a list of masses
         '''
-        peptides = self.singlePeptides.copy()
+        peptides = set(self.singlePeptides)
         cyclospec = []
         while len(peptides) != 0:
             peptides = self.expand(peptides)
-            newPeptides = []
+            newPeptides = set()
             for i in range(len(peptides)):
                 peptide = peptides.pop()
                 mass = self.getMass(peptide)
@@ -52,7 +52,7 @@ class Peptide:
                 if mass == self.spectrum[len(self.spectrum)-1] and spec == self.spectrum:
                     cyclospec.append(peptide)
                 elif mass in self.spectrum: # elif self.consistent(spec):
-                    newPeptides.append(peptide)
+                    newPeptides.add(peptide)
             peptides = newPeptides
         cyclicMasses = [] # Gets the weights of AA from the peptides
         for pep in set(cyclospec):
@@ -65,7 +65,7 @@ class Peptide:
     def consistent(self,spec):
         '''
         checks if the current spectrum is contained within the cyclospectrum
-        doesn't work for some reason
+        DOESN'T work for some reason (From the textbook)
         '''
         c = Counter(spec)
         for sp in spec:
@@ -101,11 +101,11 @@ class Peptide:
         branches and expands the peptides by appending
         possible single peptides that can be added onto the spectrum
         '''
-        newPeptides = []
+        newPeptides = set()
         while len(peptides) != 0:
             peptide = peptides.pop()
             for branch in self.singlePeptides:
-                newPeptides.append(peptide+branch)
+                newPeptides.add(peptide+branch)
         return newPeptides
 
 def main():
