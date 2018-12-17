@@ -7,13 +7,19 @@ from collections import Counter
 
 '''
 This program takes from stdin of a cyclopeptide's cyclospectrum
+computes the sequences of all peptide sequences that match the cyclospectrum
 Outputs to stdout all the combinations of the cyclopeptides masses
 '''
 
 class Peptide:
     '''
-    Peptide class that has all masses of amino acids
-    functions to calculate the cyclopeptide based on the cyclospectrum
+    Peptide class has class attributes that is a dict of all masses of amino acids
+    constructor initializes the cyclospectrum and the singlePeptides that are possible in the given cyclospectrum
+    cyclopeptideSequencing generates the cyclopeptide that matches the cyclospectrum
+    consistent tries to check if spectrums are consistent by checking counts of each spectra (DOESNT WORK)
+    cyclospectrum returns the cyclospectrum of a given peptide sequence
+    getMass returns the total mass of the amino acids in the peptide
+    expand returns the peptide sequences that have been appended with each of the singlePeptides possible
     '''
     masses = {'G': 57, 'A': 71, 'S': 87, 'P': 97, 'V': 99, 'T': 101, 'C': 103, 'I': 113, 'N': 114,'D': 115, 'K': 128, 'E': 129, 'M': 131, 'H': 137, 'F': 147, 'R': 156, 'Y': 163, 'W': 186}
     def __init__(self,spec):
@@ -66,6 +72,8 @@ class Peptide:
         '''
         checks if the current spectrum is contained within the cyclospectrum
         DOESN'T work for some reason (From the textbook)
+        This should be efficient (and should work) but for some reason it filters too much and no peptides remain in the set
+        that matches the cyclospectrum
         '''
         c = Counter(spec)
         for sp in spec:

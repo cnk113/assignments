@@ -101,7 +101,7 @@ class HiddenMarkovModel:
         returns the matrices after the iterations
         '''
         matrices = (eMatrix,sMatrix)
-        for i in num:
+        for i in range(int(num)):
             matrices = self.maximization(string,self.expectation(string,matrices))
         return matrices
 

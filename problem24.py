@@ -12,8 +12,10 @@ does not take into account stop codons
 
 class EncodedProtein:
     '''
-    EncodedProtein class has 2 class dictionaries the codon tables for RNA to amino acid
-    and DNA to amino acid
+    EncodedProtein class has 2 class attributes that are dictionaries for the codon tables of RNA to amino acid and DNA to amino acid
+    constructor sets the peptide sequence to look for
+    substrings takes in the DNA string to parse for the matching peptide sequences
+    translate takes in a DNA sequence to translate to the peptide sequence using the dnaCodonTable
     '''
     rnaCodonTable = {
     # RNA codon table

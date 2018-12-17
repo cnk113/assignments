@@ -112,7 +112,7 @@ class Viterbi:
         returns the transition and emission matrix of the resulting iterations
         '''
         matrices = (sMatrix,eMatrix)
-        for i in num:
+        for i in range(int(num)):
             matrices = self.estimate(string,self.path(string,matrices))
         return matrices
 
