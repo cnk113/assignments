@@ -58,15 +58,15 @@ def constructReversePrefixSortMatrix(X):
         return A
     else:
         N = len(X[0])
-        # 0 column
-        for i in xrange(M):
+        # first column
+        for i in range(len(M)):
             A[i,0] = i
 
-        prefixArray = list(xrange(M))
+        prefixArray = list(range(M))
         # iterate over columns 1 to N
-        for k in xrange(N):
-            a = list()
-            b = list()
+        for k in range(N):
+            a = []
+            b = []
 
             # iterate over strings in sorted list
             for i in prefixArray:
@@ -107,7 +107,7 @@ def constructYFromX(X):
     else:
         N = len(X[0])
         A = constructReversePrefixSortMatrix(X)
-        for i in xrange(M):
+        for i in range(M):
             for j in xrange(N):
                 iStr = X[A[i,j]]
                 Y[i,j] = iStr[j]
