@@ -50,31 +50,20 @@ O(NM)
 def constructReversePrefixSortMatrix(X):
     #Creates the Mx(N+1) matrix
     A = numpy.empty(shape=[len(X), 1 if len(X) == 0 else len(X[0])+1 ], dtype=int)
-    # M haplotypes
     M = len(X)
-
-    # N variable sites
     if M == 0:
         return A
     else:
         N = len(X[0])
-        # first column
         for i in range(len(M)):
             A[i,0] = i
-
         prefixArray = list(range(M))
-        # iterate over columns 1 to N
         for k in range(N):
             a = []
             b = []
-
-            # iterate over strings in sorted list
             for i in prefixArray:
-                # ith String
                 iStr = X[i]
-                # kth-1 character in ith String
                 kChar = iStr[k]
-
                 if kChar == '0':
                     a.append(i)
                 else:
@@ -108,7 +97,7 @@ def constructYFromX(X):
         N = len(X[0])
         A = constructReversePrefixSortMatrix(X)
         for i in range(M):
-            for j in xrange(N):
+            for j in range(N):
                 iStr = X[A[i,j]]
                 Y[i,j] = iStr[j]
         return Y
@@ -194,22 +183,32 @@ It should be O(MN) if I got it to work.
 
 def constructCommonSuffixMatrix(A, X):
     D = numpy.zeros(shape=A.shape, dtype=int) #Creates the Mx(N+1) D matrix
-
-    divArray = list()
-    for j in xrange(N):
-        a = list()
-        b = list()
+    M = len(A)
+    N = len(X[0])
+    d = [0] * M
+    for j in range(N):
+        a = []
+        b = []
+        e = []
         u = 0
         v = 0
         p = j + 1
         q = j + 1
-        for value in divArray:
-            if value > p:
-                p = value
-            elif value < p:
-                q = value
+        for i in range(M):
+            iStr = X[i]
+            kChar = iStr[j]
+            if d[i] > p:
+                p = d[i]
+            elif d[i] < p:
+                q = d[i]
+            if kChar == 0:
+                a.append(i)
+                b.append(p)
+            else:
+                a.append()
+                e.append(q)
 
-
+    return D
 '''
 """Problem 5.
     
