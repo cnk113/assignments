@@ -1,5 +1,6 @@
 import sys
 import numpy
+
 """The following uses Python to challenge you to create an algorithm for finding
 matches between a set of aligned strings. Minimal familiarity with Python is 
 necessary, notably list and Numpy array slicing. 
@@ -45,51 +46,51 @@ Column j (0 < j <= N) of the matrix can be constructed from column j-1 and the
 symbol in each sequence at index j-1.  
 
 Question 1: In terms of M and N what is the asymptotic cost of your algorithm?
-O(NM)
 """
+
 def constructReversePrefixSortMatrix(X):
     #Creates the Mx(N+1) matrix
-    A = numpy.empty(shape=[len(X), 1 if len(X) == 0 else len(X[0])+1 ], dtype=int)
+    A = numpy.empty(shape=[len(X), 1 if len(X) == 0 else len(X[0])+1 ], dtype=int) 
+    
+    #Code to write - you're free to define extra functions 
+    #(inline or outside of this function) if you like.
     M = len(X)
     if M == 0:
         return A
     else:
         N = len(X[0])
-        for i in range(len(M)):
-            A[i,0] = i
-        prefixArray = list(range(M))
-        for k in range(N):
+        A[:,0] = list(range(M))
+        for j in range(N):
             a = []
             b = []
+            prefixArray = A[:,j]
             for i in prefixArray:
-                iStr = X[i]
-                kChar = iStr[k]
-                if kChar == '0':
+                if X[i][j] == '0':
                     a.append(i)
                 else:
                     b.append(i)
-            prefixArray = a + b
-            A[:,k+1] = prefixArray
+            A[:,j+1] = a+b
         return A
-
 
 """Problem 2: 
 
 Following on from the previous problem, let Y be the MxN matrix such that for 
 all 0 <= i < M, 0 <= j < N, Y[i,j] = X[A[i,j]][j].
 
-Complete the following to construct Y for X.
+Complete the following to construct Y for X. 
 
-Hint: You can either use your solution to constructReversePrefixSortMatrix()
-or adapt the code from that algorithm to create Y without using constructReversePrefixSortMatrix().
+Hint: You can either use your solution to constructReversePrefixSortMatrix() 
+or adapt the code from that algorithm to create Y without using 
+constructReversePrefixSortMatrix().
 
 Question 2: In terms of M and N what is the asymptotic cost of your algorithm?
-O(MN)
 """
-
 def constructYFromX(X):
     #Creates the MxN matrix
     Y = numpy.empty(shape=[len(X), 0 if len(X) == 0 else len(X[0]) ], dtype=int)
+    
+    #Code to write - you're free to define extra functions
+    #(inline or outside of this function) if you like.
     M = len(X)
     if M == 0:
         return X
@@ -98,41 +99,41 @@ def constructYFromX(X):
         A = constructReversePrefixSortMatrix(X)
         for i in range(M):
             for j in range(N):
-                iStr = X[A[i,j]]
-                Y[i,j] = iStr[j]
+                Y[i, j] = X[A[i,j]][j]
         return Y
 
-'''Problem 3.
+"""Problem 3.
 
 Y is a transformation of X. Complete the following to construct X from Y, 
 returning X as a list of strings as defined in problem 1.
 Hint: This is the inverse of X to Y, but the code may look very similar.
 
 Question 3a: In terms of M and N what is the asymptotic cost of your algorithm?
-It should be O(NM)
 
-Question 3b: What could you use the transformation of Y for?
+Question 3b: What could you use the transformation of Y for? 
 Hint: consider the BWT.
 
 Question 3c: Can you come up with a more efficient data structure for storing Y?
-'''
-def constructXFromY(Y):
+"""
+def constructXFromY(Y, A):
     #Creates the MxN matrix
-    X = numpy.empty(shape=[len(Y), 0 if len(Y) == 0 else len(Y[0]) ], dtype=int)
+    X = numpy.empty(shape=[len(X), 0 if len(X) == 0 else len(X[0]) ], dtype=int)
+    
+    #Code to write - you're free to define extra functions
+    #(inline or outside of this function) if you like.
     M = len(Y)
     if M == 0:
-        return map(lambda i : "".join(map(str,i)), X)
+        return map(lambda i: "".join(map(str, i)), X)
     else:
         N = len(X[0])
         A = constructReversePrefixSortMatrix(Y)
-        for i in xrange(M):
-            for j in xrange(N):
-                iStr = Y[A[i,j]]
-                X[i,j] = iStr[j]
-        return map(lambda i : "".join(map(str, i)), X) #Convert back to a list of strings
+        for i in range(M):
+            for j in range(N):
+                iStr = Y[A[i, j]]
+                X[i, j] = iStr[j]
+        return map(lambda i: "".join(map(str, i)), X)  # Convert back to a list of strings
 
-'''
-Problem 4.
+"""Problem 4.
 
 Define the common suffix of two strings to be the maximum length suffix shared 
 by both strings, e.g. for "10110" and "10010" the common suffix is "10" because 
@@ -168,21 +169,24 @@ array([[0, 0, 0, 0],
        [0, 1, 0, 0],
        [0, 1, 1, 3]])
 
-Hints:
+Hints: 
 
-As before, column j (0 < j <= N) of the matrix can be constructed from column j-1
+As before, column j (0 < j <= N) of the matrix can be constructed from column j-1 
 and thesymbol in each sequence at index j-1.
 
-For an efficient algorithm consider that the length of the common suffix
-between X[A[i,j]][:j] and X[A[i-k,j]][:j], for all 0<k<=i is
+For an efficient algorithm consider that the length of the common suffix 
+between X[A[i,j]][:j] and X[A[i-k,j]][:j], for all 0<k<=i is 
 min(D[i-k+1,j], D[i-k+2,j], ..., D[i,j]).
 
 Question 4: In terms of M and N what is the asymptotic cost of your algorithm?
-It should be O(MN) if I got it to work.
-'''
+"""
+#A4: O(MN)
 
 def constructCommonSuffixMatrix(A, X):
-    D = numpy.zeros(shape=A.shape, dtype=int) #Creates the Mx(N+1) D matrix
+    D = numpy.zeros(shape=A.shape, dtype=int) #Creates the Mx(N+1) D matrix 
+
+    #Code to write - you're free to define extra functions 
+    #(inline or outside of this function) if you like.
     M = len(A)
     N = len(X[0])
     d = [0] * M
@@ -209,7 +213,7 @@ def constructCommonSuffixMatrix(A, X):
                 e.append(q)
 
     return D
-'''
+
 """Problem 5.
     
 For a pair of strings X[x], X[y], a long match ending at j is a common substring
@@ -240,7 +244,7 @@ def getLongMatches(X, minLength):
     D = constructCommonSuffixMatrix(A, X)
     
     #For each column, in ascending order of column index
-    for j in xrange(1, 0 if len(X) == 0 else len(X[0])):
+    for j in range(1, 0 if len(X) == 0 else len(X[0])):
         #Working arrays used to store indices of strings containing long matches
         #b is an array of strings that have a '0' at position j
         #c is an array of strings that have a '1' at position j
@@ -249,7 +253,7 @@ def getLongMatches(X, minLength):
         b, c = [], []
         
         #Iterate over the aligned symbols in column j in reverse prefix order
-        for i in xrange(len(X)):
+        for i in range(len(X)):
             #For each string in the order check if there is a long match between
             #it and the previous string.
             #If there isn't a long match then this implies that there can
