@@ -46,6 +46,7 @@ Column j (0 < j <= N) of the matrix can be constructed from column j-1 and the
 symbol in each sequence at index j-1.  
 
 Question 1: In terms of M and N what is the asymptotic cost of your algorithm?
+O(MN)
 """
 
 def constructReversePrefixSortMatrix(X):
@@ -63,8 +64,7 @@ def constructReversePrefixSortMatrix(X):
         for j in range(N):
             a = []
             b = []
-            prefixArray = A[:,j]
-            for i in prefixArray:
+            for i in A[:,j]:
                 if X[i][j] == '0':
                     a.append(i)
                 else:
@@ -84,6 +84,7 @@ or adapt the code from that algorithm to create Y without using
 constructReversePrefixSortMatrix().
 
 Question 2: In terms of M and N what is the asymptotic cost of your algorithm?
+O(MN)
 """
 def constructYFromX(X):
     #Creates the MxN matrix
@@ -99,7 +100,7 @@ def constructYFromX(X):
         A = constructReversePrefixSortMatrix(X)
         for i in range(M):
             for j in range(N):
-                Y[i, j] = X[A[i,j]][j]
+                Y[i,j] = X[A[i,j]][j]
         return Y
 
 """Problem 3.
@@ -115,22 +116,21 @@ Hint: consider the BWT.
 
 Question 3c: Can you come up with a more efficient data structure for storing Y?
 """
-def constructXFromY(Y, A):
+def constructXFromY(Y):
     #Creates the MxN matrix
     X = numpy.empty(shape=[len(X), 0 if len(X) == 0 else len(X[0]) ], dtype=int)
     
     #Code to write - you're free to define extra functions
     #(inline or outside of this function) if you like.
-    M = len(Y)
+    M = len(X)
     if M == 0:
         return map(lambda i: "".join(map(str, i)), X)
     else:
         N = len(X[0])
-        A = constructReversePrefixSortMatrix(Y)
+        A = constructReversePrefixSortMatrix(X)
         for i in range(M):
             for j in range(N):
-                iStr = Y[A[i, j]]
-                X[i, j] = iStr[j]
+                X[A[i,j]][j] = Y[i,j]
         return map(lambda i: "".join(map(str, i)), X)  # Convert back to a list of strings
 
 """Problem 4.
@@ -187,32 +187,27 @@ def constructCommonSuffixMatrix(A, X):
 
     #Code to write - you're free to define extra functions 
     #(inline or outside of this function) if you like.
-    M = len(A)
-    N = len(X[0])
-    d = [0] * M
-    for j in range(N):
-        a = []
-        b = []
-        e = []
-        u = 0
-        v = 0
-        p = j + 1
-        q = j + 1
-        for i in range(M):
-            iStr = X[i]
-            kChar = iStr[j]
-            if d[i] > p:
-                p = d[i]
-            elif d[i] < p:
-                q = d[i]
-            if kChar == 0:
-                a.append(i)
-                b.append(p)
-            else:
-                a.append()
-                e.append(q)
-
-    return D
+    if len(X) == 0:
+        return D
+    else:
+        for j in range(len(X[0])):
+            d = []
+            e = []
+            p = j+1
+            q = j+1
+            for i in range(len(X)):
+                if D[i,j] > p:
+                    p = D[i,j]
+                if D[i,j] > q:
+                    q = D[i,j]
+                if X[A[i,j]][j] == 0:
+                    d.append(p)
+                    p = 0
+                else:
+                    e.append(q)
+                    q = 0
+            D[:,j+1] = d+e
+        return D
 
 """Problem 5.
     
