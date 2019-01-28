@@ -116,21 +116,20 @@ Hint: consider the BWT.
 
 Question 3c: Can you come up with a more efficient data structure for storing Y?
 """
-def constructXFromY(Y):
+def constructXFromY(Y, A):
     #Creates the MxN matrix
-    X = numpy.empty(shape=[len(X), 0 if len(X) == 0 else len(X[0]) ], dtype=int)
+    X = numpy.empty(shape=[len(A), 0 if len(A) == 0 else len(A[0])-1 ], dtype=int)
     
     #Code to write - you're free to define extra functions
     #(inline or outside of this function) if you like.
-    M = len(X)
+    M = len(A)
     if M == 0:
         return map(lambda i: "".join(map(str, i)), X)
     else:
-        N = len(X[0])
-        A = constructReversePrefixSortMatrix(X)
+        N = len(A[0])
         for i in range(M):
             for j in range(N):
-                X[A[i,j]][j] = Y[i,j]
+                X[A[i,j],[j]] = Y[i,j]
         return map(lambda i: "".join(map(str, i)), X)  # Convert back to a list of strings
 
 """Problem 4.
