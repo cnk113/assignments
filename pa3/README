@@ -1,0 +1,11 @@
+// Chang Kim
+// cnkim
+// pa3
+
+Sparse.java       Handles the file input and output for the Matrix class with a sparse matrix
+Matrix.java       A sparse matrix ADT where the zeroes are represented as blank nodes in the List 
+List.java         List ADT that contains the value of the elements in the matrix at a specific row
+MatrixTest.java   Matrix ADT tester for errors and bugs
+ListTest.java     List ADT tester for error and bugs
+Makefile          Makes and compiles all of the above files
+README            Description of the files submitted

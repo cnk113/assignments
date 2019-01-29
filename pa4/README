@@ -1,0 +1,13 @@
+// Chang Kim
+// cnkim
+// pa4
+
+List.c      List ADT for the adjacency list for a vertex
+List.h      Header file for List ADT
+Graph.c     Graph ADT with implementation of a BFS
+Graph.h     Header file for the Graph ADT
+GraphTest.c Tester file for the Graph ADT
+FindPath.c  Input and output handler for the Graph ADT
+Makefile    Makes and compiles the aforementioned files
+README      Descriptions of the files submitted
+

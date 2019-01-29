@@ -1,0 +1,11 @@
+// README
+// Chang Kim
+// cnkim
+// pa2
+
+List.c         Doubly linked list ADT
+List.h         Header file for List.c
+Lex.c          Lexicographic sorter using List ADT
+ListClient.c   Test file for List.c
+Makefile       Compliles all the files create executables
+README         Description of the files in pa2

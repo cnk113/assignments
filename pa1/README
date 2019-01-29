@@ -1,0 +1,11 @@
+// Chang Kim
+// cnkim
+// cmps101
+// 4/9/18
+// pa1
+
+Makefile          Compiles the files
+Lex.java          Sorts the inputted file lexographically using a doubly linked list
+List.java         The underlying doubly linked list ADT that is used for sorting in Lex
+ListClient.java   The test file for List
+README            Description of the files

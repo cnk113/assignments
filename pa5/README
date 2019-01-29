@@ -1,0 +1,15 @@
+// Chang Kim
+// cnkim
+// pa5
+
+List.c             List ADT for the adjacency list for a vertex
+List.h             Header file for List ADT
+Graph.c            Graph ADT with implementation of a DFS
+                   Also kept all previous methods from pa4
+Graph.h            Header file for the Graph ADT
+                   Also kept all previous methods from pa4
+GraphTest.c        Tester file for the Graph ADT methods
+FindComponenets.c  Input and output handler for the Graph ADT using DFS
+Makefile           Makes and compiles the aforementioned files
+README             Descriptions of the files submitted
+
