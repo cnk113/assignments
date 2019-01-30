@@ -189,23 +189,26 @@ def constructCommonSuffixMatrix(A, X):
     if len(X) == 0:
         return D
     else:
+        prev = D[:,0]
         for j in range(len(X[0])):
             d = []
             e = []
             p = j+1
             q = j+1
             for i in range(len(X)):
-                if D[i,j] > p:
-                    p = D[i,j]
-                if D[i,j] > q:
-                    q = D[i,j]
+                if prev[i] > p:
+                    p = prev[i]
+                if prev[i] > q:
+                    q = prev[i]
                 if X[A[i,j]][j] == 0:
                     d.append(p)
                     p = 0
                 else:
                     e.append(q)
                     q = 0
-            D[:,j+1] = d+e
+            prev = d+e
+            for i in range(len(X)):
+                D[i,j+1] = abs(0-prev[i])
         return D
 
 """Problem 5.
