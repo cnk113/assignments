@@ -89,7 +89,7 @@ O(MN)
 def constructYFromX(X):
     #Creates the MxN matrix
     Y = numpy.empty(shape=[len(X), 0 if len(X) == 0 else len(X[0]) ], dtype=int)
-    
+
     #Code to write - you're free to define extra functions
     #(inline or outside of this function) if you like.
     M = len(X)
@@ -110,26 +110,33 @@ returning X as a list of strings as defined in problem 1.
 Hint: This is the inverse of X to Y, but the code may look very similar.
 
 Question 3a: In terms of M and N what is the asymptotic cost of your algorithm?
+O(MN)
 
 Question 3b: What could you use the transformation of Y for? 
 Hint: consider the BWT.
 
 Question 3c: Can you come up with a more efficient data structure for storing Y?
 """
-def constructXFromY(Y, A):
+def constructXFromY(Y):
     #Creates the MxN matrix
-    X = numpy.empty(shape=[len(A), 0 if len(A) == 0 else len(A[0])-1 ], dtype=int)
-    
+    X = numpy.empty(shape=[len(Y), 0 if len(Y) == 0 else len(Y[0]) ], dtype=int)
+
     #Code to write - you're free to define extra functions
     #(inline or outside of this function) if you like.
-    M = len(A)
-    if M == 0:
+    if len(Y) == 0:
         return map(lambda i: "".join(map(str, i)), X)
     else:
-        N = len(A[0])
-        for i in range(M):
-            for j in range(N):
-                X[A[i,j],[j]] = Y[i,j]
+        A = list(range(len(Y)))
+        for j in range(len(Y[0])):
+            a = []
+            b = []
+            for i in range(len(Y)):
+                X[A[i]][j] = Y[i,j]
+                if Y[i,j] == 0:
+                    a.append(A[i])
+                else:
+                    b.append(A[i])
+            A = a+b
         return map(lambda i: "".join(map(str, i)), X)  # Convert back to a list of strings
 
 """Problem 4.
@@ -178,6 +185,7 @@ between X[A[i,j]][:j] and X[A[i-k,j]][:j], for all 0<k<=i is
 min(D[i-k+1,j], D[i-k+2,j], ..., D[i,j]).
 
 Question 4: In terms of M and N what is the asymptotic cost of your algorithm?
+O(MN)
 """
 #A4: O(MN)
 
@@ -200,7 +208,7 @@ def constructCommonSuffixMatrix(A, X):
                     p = prev[i]
                 if prev[i] > q:
                     q = prev[i]
-                if X[A[i,j]][j] == 0:
+                if X[A[i,j]][j] == '0':
                     d.append(p)
                     p = 0
                 else:
@@ -208,7 +216,10 @@ def constructCommonSuffixMatrix(A, X):
                     q = 0
             prev = d+e
             for i in range(len(X)):
-                D[i,j+1] = abs(0-prev[i])
+                if prev[i] == 0:
+                    D[i,j+1] = D[i,j] + 1
+                else:
+                    D[i,j+1] = 0
         return D
 
 """Problem 5.
