@@ -114,13 +114,15 @@ O(MN)
 
 Question 3b: What could you use the transformation of Y for? 
 Hint: consider the BWT.
+Since each column of Y is the BWT, they can recreate the original strings, in this case X. It is more compact
+therefore we can save on storage.
 
 Question 3c: Can you come up with a more efficient data structure for storing Y?
+We can just store the last column of Y and recreate the X.
 """
 def constructXFromY(Y):
     #Creates the MxN matrix
     X = numpy.empty(shape=[len(Y), 0 if len(Y) == 0 else len(Y[0]) ], dtype=int)
-
     #Code to write - you're free to define extra functions
     #(inline or outside of this function) if you like.
     if len(Y) == 0:
@@ -131,13 +133,13 @@ def constructXFromY(Y):
             a = []
             b = []
             for i in range(len(Y)):
-                X[A[i]][j] = Y[i,j]
+                X[A[i],[j]] = Y[i,j]
                 if Y[i,j] == 0:
                     a.append(A[i])
                 else:
                     b.append(A[i])
             A = a+b
-        return map(lambda i: "".join(map(str, i)), X)  # Convert back to a list of strings
+        return list(map(lambda i: "".join(map(str, i)), X))  # Convert back to a list of strings
 
 """Problem 4.
 
@@ -216,10 +218,7 @@ def constructCommonSuffixMatrix(A, X):
                     q = 0
             prev = d+e
             for i in range(len(X)):
-                if prev[i] == 0:
-                    D[i,j+1] = D[i,j] + 1
-                else:
-                    D[i,j+1] = 0
+                D[i,j+1] = abs(prev[i]-j-1)
         return D
 
 """Problem 5.
@@ -235,7 +234,8 @@ the end of the strings.
     
 Question 5a: What is the asymptotic cost of the algorithm in terms of M, N and the
 number of long matches?
-    
+   
+
 Question 5b: Can you see any major time efficiencies that could be gained by
 refactoring?
     
