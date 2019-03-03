@@ -35,7 +35,7 @@ class TestCase(unittest.TestCase):
         mI = sM.MinimizerIndexer(x, w=w, k=k, t=1000) # Set t so that no filtering takes place
         # Check the sets of minimizer sets are equal        
         self.assertEqual(xM, getMinmers(mI))
-    
+
     def testSeedCoordinates(self):
         """Tests cA.SeedCluster indexer using randomly generated 
         examples, checking the output using a simple brute force algorithm.
@@ -76,16 +76,17 @@ class TestCase(unittest.TestCase):
                             component1 += component2
                             for (x3, y3) in component2:
                                 seedComponents[(x3, y3)] = component1
-            
             # Generate seed clusters
             seedClusters = sM.SeedCluster.clusterSeeds(seedList, l)
-            
             # Check we get what we expect
             for seedCluster in seedClusters:
                 expectedCluster = list(seedComponents[seedCluster.seeds[0]])
                 expectedCluster.sort()
+                print 'check'
+                print expectedCluster
+                print seedCluster.seeds
                 self.assertEquals(expectedCluster, seedCluster.seeds)
-      
+
     def testSmithWaterman(self):
         """Tests cA.SmithWaterman using randomly generated 
         examples, checking the output using a simple brute force algorithm.
