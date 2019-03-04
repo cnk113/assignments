@@ -141,22 +141,29 @@ class SeedCluster:
         """ 
         
         # Code to complete - you are free to define other functions as you like
-        allSeeds = []
+        adj = {}
         for seed in seeds:
             ySeeds = seed[1]
             for y in ySeeds:
-                allSeeds.append((seed[0],y))
+                adj[(seed[0],y)] = []
+        for node1 in adj:
+            for node2 in adj:
+                if node1 != node2 and abs(node2[0] - node1[0]) <= l and abs(node2[1] - node1[1]) <= l:
+                    adj.get(node1).append(node2)
         allClusters = []
-        print allSeeds
-        print l
-        for seed1 in allSeeds:
-            adjacency = [seed1]
-            for seed2 in allSeeds:
-                #if seed2[0] - seed1[0] > l or l == 0:
-                    #break
-                if abs(seed2[1] - seed1[1]) <= l and abs(seed2[0] - seed1[0]) <= l and seed1 != seed2:
-                    adjacency.append(seed2)
-            allClusters.append(adjacency)
+        visited = []
+        for start in adj:
+            if start not in visited:
+                cluster = set()
+                stack = [start]
+                while stack:
+                    current = stack.pop()
+                    cluster.update([current])
+                    visited.append(current)
+                    for neighbors in adj.get(current):
+                        if neighbors not in cluster:
+                            stack.append(neighbors)
+                allClusters.append(list(cluster))
         connected = set()
         for adj in allClusters:
             connected.add(SeedCluster(adj))

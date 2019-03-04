@@ -82,9 +82,6 @@ class TestCase(unittest.TestCase):
             for seedCluster in seedClusters:
                 expectedCluster = list(seedComponents[seedCluster.seeds[0]])
                 expectedCluster.sort()
-                print 'check'
-                print expectedCluster
-                print seedCluster.seeds
                 self.assertEquals(expectedCluster, seedCluster.seeds)
 
     def testSmithWaterman(self):
