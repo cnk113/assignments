@@ -61,7 +61,7 @@ class MinimizerIndexer(object):
             lex = []
             for j in range(len(window)-k+1):
                 lex.append(window[j:j+k])
-            minmer = sorted(lex)[0]
+            minmer = sorted(lex)[0] # Gets the minmer 
             id = lex.index(minmer) + i
             count[(minmer,id)] = count.get((minmer,id),0) + 1
         minmers = []
@@ -69,7 +69,7 @@ class MinimizerIndexer(object):
             if count.get(key) <= t:
                 minmers.append(key)
         for minmer, pos in sorted(minmers):
-            self.minimizerMap[minmer] = self.minimizerMap.get(minmer,()) + (pos,)
+            self.minimizerMap[minmer] = self.minimizerMap.get(minmer,()) + (pos,) # Probably should use defaultdict
         # unit-test
 
     def getMatches(self, searchString):
@@ -85,13 +85,11 @@ class MinimizerIndexer(object):
         You will need to use the "yield" keyword
         """
         # Code to complete - you are free to define additional functions
-        matches = []
-        search = MinimizerIndexer(searchString,self.w,self.k,self.t)
+        search = MinimizerIndexer(searchString,self.w,self.k,self.t) # Easier to do it this way
         for minmer in self.minimizerMap:
             searchMinmer = search.minimizerMap.get(minmer)
             if searchMinmer != None:
-                matches.append((searchMinmer,self.minimizerMap.get(minmer)))
-        yield matches
+                yield searchMinmer[0], self.minimizerMap.get(minmer)
 
 class SeedCluster:
     """ Represents a set of seeds between two strings.
@@ -141,7 +139,7 @@ class SeedCluster:
         """ 
         
         # Code to complete - you are free to define other functions as you like
-        adj = {}
+        adj = {} # Adjaceny list
         for seed in seeds:
             ySeeds = seed[1]
             for y in ySeeds:
@@ -149,14 +147,14 @@ class SeedCluster:
         for node1 in adj:
             for node2 in adj:
                 if node1 != node2 and abs(node2[0] - node1[0]) <= l and abs(node2[1] - node1[1]) <= l:
-                    adj.get(node1).append(node2)
+                    adj.get(node1).append(node2) # append 'close' neighbors
         allClusters = []
         visited = []
         for start in adj:
-            if start not in visited:
+            if start not in visited: # Check for disconnected nodes
                 cluster = set()
                 stack = [start]
-                while stack:
+                while stack: # DFS
                     current = stack.pop()
                     cluster.update([current])
                     visited.append(current)
@@ -185,8 +183,8 @@ class SmithWaterman(object):
         for SIMD implementation since the the scores can be produced with less precision.
         """
         # Code to complete to compute the edit matrix
-        self.matrix = numpy.zeros(shape=[len(string1)+1,len(string2)+1],dtype=int)
-        self.backpointer = numpy.zeros(shape=[len(string1)+1,len(string2)+1],dtype=int)
+        self.matrix = numpy.zeros(shape=[len(string1)+1,len(string2)+1],dtype=int) # Scoring matrix
+        self.backpointer = numpy.zeros(shape=[len(string1)+1,len(string2)+1],dtype=int) # Backpointer matrix
         for i in range(1,len(string1)+1):
             for j in range(1,len(string2)+1):
                 if string1[i-1] == string2[j-1]:
@@ -196,9 +194,9 @@ class SmithWaterman(object):
                 val.extend([self.matrix[i-1,j] + gapScore,self.matrix[i,j-1] + gapScore])
                 score = max(val)
                 back = val.index(score)
-                if back == 0:
+                if back == 0: # 0 means match
                     self.backpointer[i,j] = 0
-                elif back == 1:
+                elif back == 1: # 1 and 2 means gap based on if it's deletion or insertion in the target
                     self.backpointer[i,j] = 1
                 else:
                     self.backpointer[i,j] = 2
@@ -243,7 +241,7 @@ class SmithWaterman(object):
         """ Returns the maximum alignment score
         """
         # Code to complete
-        return numpy.max(self.matrix.max(axis=0))
+        return numpy.max(self.matrix)
     
 def simpleMap(targetString, minimizerIndex, queryString, config):
     """ Function takes a target string with precomputed minimizer index and a query string
@@ -388,8 +386,8 @@ def main():
                          "max_alignment_score: %s" % 
                          (queryIndex, len(query.sequence), alignment is not None, alignmentScore)) 
             # Comment this out to test on a subset
-            #if queryIndex > 100:
-            #    break
+            if queryIndex > 100:
+                break
     
     # Print some stats
     logger.critical("Finished alignments in %s total seconds, average alignment score: %s" % 
